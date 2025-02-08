@@ -1,22 +1,27 @@
+import "@dotenvx/dotenvx/config"
 import * as cheerio from "cheerio"
+import { Config, Effect, Redacted } from "effect"
 import fs from "fs"
 import path from "path"
 import { chromium } from "playwright"
 
 const COLORS = ["Red", "Green", "Blue", "Purple", "Black", "Yellow"]
 
-const main = async () => {
-  const browser = await chromium.launch({
-    headless: true,
-    // proxy: {
-    //   // Use rotating proxy to avoid IP ban
-    //   server: `http://residential-proxy.scrapeops.io:8181`,
-    //   username: "scrapeops",
-    //   password: "",
-    // },
-  })
-  const context = await browser.newContext({ ignoreHTTPSErrors: true })
-  const page = await context.newPage()
+const program = Effect.gen(function* () {
+  const redactedPw = yield* Config.redacted("PROXY_PASSWORD")
+  const browser = yield* Effect.promise(() =>
+    chromium.launch({
+      headless: true,
+      proxy: {
+        // Use rotating proxy to avoid IP ban
+        server: `http://residential-proxy.scrapeops.io:8181`,
+        username: "scrapeops",
+        password: Redacted.value(redactedPw),
+      },
+    }),
+  )
+  const context = yield* Effect.promise(() => browser.newContext({ ignoreHTTPSErrors: true }))
+  const page = yield* Effect.promise(() => context.newPage())
 
   // https://scrapeops.io/docs/residential-mobile-proxy-aggregator/integration-examples/nodejs-playwright-example/
   // Test rotating IP to make sure it's working
@@ -25,18 +30,22 @@ const main = async () => {
   // console.log(pageContent)
   // return
 
-  await page.goto("https://en.onepiece-cardgame.com/cardlist", {
-    timeout: 180000,
-  })
+  yield* Effect.promise(() =>
+    page.goto("https://en.onepiece-cardgame.com/cardlist", {
+      timeout: 180000,
+    }),
+  )
 
   // Handle cookie consent
   const cookieCloseButtonSelector = "button.onetrust-close-btn-handler"
   try {
-    const cookieButton = await page.waitForSelector(cookieCloseButtonSelector, {
-      state: "visible",
-    })
+    const cookieButton = yield* Effect.promise(() =>
+      page.waitForSelector(cookieCloseButtonSelector, {
+        state: "visible",
+      }),
+    )
     if (cookieButton) {
-      await cookieButton.click()
+      yield* Effect.promise(() => cookieButton.click())
       console.log("Cookie consent banner closed.")
     }
   } catch {
@@ -44,14 +53,22 @@ const main = async () => {
   }
 
   // Click the series selection button
-  await page.waitForSelector('div.seriesCol button.selModalButton[data-selmodalbtn="series"]')
-  await page.click('div.seriesCol button.selModalButton[data-selmodalbtn="series"]')
+  yield* Effect.promise(() =>
+    page.waitForSelector('div.seriesCol button.selModalButton[data-selmodalbtn="series"]'),
+  )
+  yield* Effect.promise(() =>
+    page.click('div.seriesCol button.selModalButton[data-selmodalbtn="series"]'),
+  )
   console.log("Clicked the series selection button.")
 
   // Select "ALL" in the series dropdown
-  await page.waitForSelector("div.selModal")
-  await page.waitForSelector('div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")')
-  await page.click('div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")')
+  yield* Effect.promise(() => page.waitForSelector("div.selModal"))
+  yield* Effect.promise(() =>
+    page.waitForSelector('div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")'),
+  )
+  yield* Effect.promise(() =>
+    page.click('div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")'),
+  )
   console.log("Selected ALL in dropdown.")
 
   for (const color of COLORS) {
@@ -62,30 +79,33 @@ const main = async () => {
 
     // Apply the color filter
     const colorSelector = `label.checkBtn.isColor_${color}[for="color_${color}"]`
-    await page.waitForSelector(colorSelector)
-    await page.click(colorSelector)
+    yield* Effect.promise(() => page.waitForSelector(colorSelector))
+    yield* Effect.promise(() => page.click(colorSelector))
     console.log(`Applied ${color} color filter.`)
 
     // Click the SEARCH button and wait for results
-    await page.waitForSelector("div.commonBtn.submitBtn")
-    await page.click("div.commonBtn.submitBtn")
+    yield* Effect.promise(() => page.waitForSelector("div.commonBtn.submitBtn"))
+    yield* Effect.promise(() => page.click("div.commonBtn.submitBtn"))
     console.log(`SEARCH button clicked for color: ${color}, waiting for results.`)
 
     while (hasNextPage) {
       console.log(`Scraping page ${pageNum + 1} for color ${color}`)
-      await page.waitForSelector("div.resultCol")
+      Effect.promise(() => page.waitForSelector("div.resultCol"))
 
       // Ensure at least one card element is attached to the DOM
-      await page.waitForFunction(() => {
-        return document.querySelectorAll("div.resultCol dl.modalCol").length > 0
-      })
+      yield* Effect.promise(() =>
+        page.waitForFunction(() => {
+          return document.querySelectorAll("div.resultCol dl.modalCol").length > 0
+        }),
+      )
+
       // Get all hidden dl.modalCol elements inside resultCol
-      const cardElements = await page.$$("div.resultCol dl.modalCol")
+      const cardElements = yield* Effect.promise(() => page.$$("div.resultCol dl.modalCol"))
       console.log(`Found ${cardElements.length} cards for color: ${color}`)
 
       for (const cardElement of cardElements) {
         try {
-          const cardHtml = await cardElement.innerHTML()
+          const cardHtml = yield* Effect.promise(() => cardElement.innerHTML())
           const cardData = extractCardDataFromHtml(cardHtml)
           cardData.colorFilter = color // Add color filter info
           colorCardData.push(cardData)
@@ -95,20 +115,24 @@ const main = async () => {
       }
 
       // Check if NEXT button is disabled
-      const nextButtonDisabled = await page.$("div.pagerCol a.nextBtn.disable")
+      const nextButtonDisabled = yield* Effect.promise(() =>
+        page.$("div.pagerCol a.nextBtn.disable"),
+      )
       if (nextButtonDisabled) {
         hasNextPage = false
         console.log(`Finished scraping all pages for color: ${color}`)
       } else {
-        const nextButton = await page.waitForSelector("div.pagerCol a.nextBtn", {
-          state: "visible",
-        })
+        const nextButton = yield* Effect.promise(() =>
+          page.waitForSelector("div.pagerCol a.nextBtn", {
+            state: "visible",
+          }),
+        )
 
         if (nextButton) {
           pageNum++
-          await nextButton.scrollIntoViewIfNeeded()
+          yield* Effect.promise(() => nextButton.scrollIntoViewIfNeeded())
+          yield* Effect.promise(() => nextButton.click())
           // console.log(`Navigating to next page for color: ${color}`)
-          await nextButton.click()
         } else {
           console.log(`NEXT button not found for color: ${color}, stopping pagination.`)
           hasNextPage = false
@@ -117,7 +141,7 @@ const main = async () => {
     }
 
     // Deselect the color before moving to the next
-    await page.click(colorSelector)
+    yield* Effect.promise(() => page.click(colorSelector))
     console.log(`Finished scraping ${pageNum} pages for color ${color}`)
 
     // Save all card data
@@ -131,8 +155,8 @@ const main = async () => {
     console.log(`Color card data saved to ${filePath}`)
   }
 
-  await browser.close()
-}
+  yield* Effect.promise(() => browser.close())
+})
 
 interface CardData {
   cardName: string
@@ -171,4 +195,4 @@ function extractCardDataFromHtml(html: string): CardData {
   }
 }
 
-main()
+Effect.runPromise(program)
