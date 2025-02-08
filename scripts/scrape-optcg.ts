@@ -160,7 +160,7 @@ const program = Effect.gen(function* () {
 
 interface CardData {
   cardName: string
-  life: string
+  cost: string
   attribute: string
   power: string
   counter: string
@@ -181,7 +181,7 @@ function extractCardDataFromHtml(html: string): CardData {
 
   return {
     cardName: getText(".cardName"),
-    life: getText(".cost").replace("Life", "").trim(),
+    cost: getText(".cost").replace("Life", "").replace("Cost", "").trim(),
     attribute: getText(".attribute i"),
     power: getText(".power").replace("Power", "").trim(),
     counter: getText(".counter").replace("Counter", "").trim(),
