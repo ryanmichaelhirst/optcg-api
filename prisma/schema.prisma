@@ -49,14 +49,14 @@ model Card {
   life      Int?
   cost      Int?
   attribute String
-  power     Int
+  power     Int?
   counter   Int?
   color     String
-  class     String // "Dressrosa"
+  type      String // "Dressrosa"
   effect    String?
   set       String
 
   serialNumber String // EB01-040
-  typeAbrrev   String // L
-  type         String // Leader
+  rarity       String // L
+  category     String // Leader
 }
