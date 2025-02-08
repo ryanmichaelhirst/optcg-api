@@ -3,6 +3,7 @@ import { fakerEN_US as faker } from "@faker-js/faker"
 
 import fs from "fs"
 import path from "path"
+import { SeedCardData } from "scripts/scrape-optcg"
 
 async function seed() {
   const iterations = Array.from(Array(10).keys())
@@ -26,33 +27,22 @@ async function seed() {
       const filePath = path.join(process.cwd(), "tmp", file)
 
       const content = fs.readFileSync(filePath, "utf-8")
-      const jsonData = JSON.parse(content)
+      const jsonData: SeedCardData[] = JSON.parse(content)
       for (const card of jsonData) {
-        // cardName: 'Sanji',
-        // life: 'Cost4',
-        // attribute: 'Strike',
-        // power: '5000',
-        // counter: '1000',
-        // color: 'Yellow',
-        // type: 'The Vinsmoke Family',
-        // effect: '[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.)',
-        // cardSet: '-KINGDOMS OF INTRIGUE- [OP04]',
-        // infoCol: [ 'OP04-104', 'SR', 'CHARACTER' ],
-        // colorFilter: 'Yellow'
         await db.card.create({
           data: {
             name: card.cardName,
-            cost: Number(card.life || card.cost),
+            life: Number(card.life.replace(/cost/gi, "")),
             attribute: card.attribute,
             power: Number(card.power),
             counter: Number(card.counter),
             color: card.color,
-            type: card.type,
+            class: card.class,
             effect: card.effect,
             set: card.cardSet,
-            serialNumber: card.infoCol[0],
+            code: card.infoCol[0],
             rarity: card.infoCol[1],
-            category: card.infoCol[2],
+            type: card.infoCol[2],
           },
         })
       }

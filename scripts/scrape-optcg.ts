@@ -8,27 +8,7 @@ import { chromium } from "playwright"
 const COLORS = ["Red", "Green", "Blue", "Purple", "Black", "Yellow"]
 
 const program = Effect.gen(function* () {
-  const redactedPw = yield* Config.redacted("PROXY_PASSWORD")
-  const browser = yield* Effect.promise(() =>
-    chromium.launch({
-      headless: true,
-      proxy: {
-        // Use rotating proxy to avoid IP ban
-        server: `http://residential-proxy.scrapeops.io:8181`,
-        username: "scrapeops",
-        password: Redacted.value(redactedPw),
-      },
-    }),
-  )
-  const context = yield* Effect.promise(() => browser.newContext({ ignoreHTTPSErrors: true }))
-  const page = yield* Effect.promise(() => context.newPage())
-
-  // https://scrapeops.io/docs/residential-mobile-proxy-aggregator/integration-examples/nodejs-playwright-example/
-  // Test rotating IP to make sure it's working
-  // await page.goto("https://httpbin.org/ip")
-  // const pageContent = await page.textContent("body")
-  // console.log(pageContent)
-  // return
+  const { browser, page } = yield* setup("test")
 
   yield* Effect.promise(() =>
     page.goto("https://en.onepiece-cardgame.com/cardlist", {
@@ -74,7 +54,7 @@ const program = Effect.gen(function* () {
   for (const color of COLORS) {
     let hasNextPage = true
     let pageNum = 0
-    const colorCardData: CardData[] = []
+    const colorCardData: SeedCardData[] = []
     console.log(`Starting to scrape cards for color: ${color}`)
 
     // Apply the color filter
@@ -158,21 +138,51 @@ const program = Effect.gen(function* () {
   yield* Effect.promise(() => browser.close())
 })
 
-interface CardData {
+function setup(type: "test" | "dev" | "prod") {
+  return Effect.gen(function* () {
+    const redactedPw = yield* Config.redacted("PROXY_PASSWORD")
+    const browser = yield* Effect.promise(() =>
+      chromium.launch({
+        headless: true,
+        // Use rotating proxy to avoid IP ban
+        ...(type === "prod" && {
+          proxy: {
+            server: `http://residential-proxy.scrapeops.io:8181`,
+            username: "scrapeops",
+            password: Redacted.value(redactedPw),
+          },
+        }),
+      }),
+    )
+    const context = yield* Effect.promise(() => browser.newContext({ ignoreHTTPSErrors: true }))
+    const page = yield* Effect.promise(() => context.newPage())
+
+    // https://scrapeops.io/docs/residential-mobile-proxy-aggregator/integration-examples/nodejs-playwright-example/
+    // Test rotating IP to make sure it's working
+    if (type === "test") {
+      yield* Effect.promise(() => page.goto("https://httpbin.org/ip"))
+      const pageContent = yield* Effect.promise(() => page.textContent("body"))
+      return yield* Effect.fail("Testing rotating IP to make sure it's working: " + pageContent)
+    }
+
+    return { browser, page }
+  })
+}
+
+export interface SeedCardData {
   cardName: string
-  cost: string
+  life: string
   attribute: string
   power: string
   counter: string
   color: string
-  type: string
+  class: string
   effect: string
   cardSet: string
   infoCol: string[]
   colorFilter?: string // To store the applied color filter
 }
-
-function extractCardDataFromHtml(html: string): CardData {
+function extractCardDataFromHtml(html: string): SeedCardData {
   const $ = cheerio.load(html)
 
   const getText = (selector: string): string => {
@@ -181,12 +191,12 @@ function extractCardDataFromHtml(html: string): CardData {
 
   return {
     cardName: getText(".cardName"),
-    cost: getText(".cost").replace("Life", "").replace("Cost", "").trim(),
+    life: getText(".cost").replace("Life", "").replace("Cost", "").trim(),
     attribute: getText(".attribute i"),
     power: getText(".power").replace("Power", "").trim(),
     counter: getText(".counter").replace("Counter", "").trim(),
     color: getText(".color").replace("Color", "").trim(),
-    type: getText(".feature").replace("Type", "").trim(),
+    class: getText(".feature").replace("Type", "").trim(),
     effect: getText(".text").replace("Effect", "").trim(),
     cardSet: getText(".getInfo").replace("Card Set(s)", "").trim(),
     infoCol: $(".infoCol span")

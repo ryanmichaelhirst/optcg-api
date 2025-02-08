@@ -45,18 +45,16 @@ model Payment {
 model Card {
   id        Int     @id @default(autoincrement())
   uid       String  @unique @default(dbgenerated("('card_'::text || nanoid())"))
-  name      String
-  life      Int?
-  cost      Int?
-  attribute String
-  power     Int?
-  counter   Int?
-  color     String
-  type      String // "Dressrosa"
-  effect    String?
-  set       String
-
-  serialNumber String // EB01-040
-  rarity       String // L
-  category     String // Leader
+  code      String // "EB01-001"
+  rarity    String // L
+  type      String // Leader
+  name      String // "Kozuki Oden"
+  life      Int? // 4 
+  attribute String // "Slash"
+  power     Int? // 5000
+  counter   Int? // null
+  color     String // "Red/Green"
+  class     String // "Land of Wano/Kouzuki Clan"
+  effect    String? // "All of your {Land of Wano} type Character cards without a Counter..."
+  set       String // "-Memorial Collection-[EB-01]"
 }
