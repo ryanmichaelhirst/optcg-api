@@ -38,7 +38,9 @@ async function seed() {
             counter: Number(card.counter),
             color: card.color,
             class: card.class,
-            effect: card.effect,
+            ...(card.effect.trim().length > 1 && {
+              effect: card.effect,
+            }),
             set: card.cardSet,
             code: card.infoCol[0],
             rarity: card.infoCol[1],

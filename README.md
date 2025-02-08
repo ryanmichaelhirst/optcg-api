@@ -13,3 +13,14 @@ Color options: red | green | blue | purple | black | yellow
 
 Pass a specific script mode with `pnpm tsx scripts/scrape-optcg.ts --color=blue --mode=test`
 Mode options: test | dev | prod
+
+## Seeding
+
+Run docker container
+`pnpm docker`
+
+Seed database
+`pnpm prisma migrate reset`
+
+View db
+`pnpm prisma studio`
