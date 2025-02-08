@@ -14,7 +14,7 @@ datasource db {
 model User {
   id       Int     @id @default(autoincrement())
   uid      String  @unique @default(dbgenerated("('user_'::text || nanoid())"))
-  googleId String     @unique
+  googleId String  @unique
   email    String  @unique
   name     String
   photoUrl String?
@@ -39,4 +39,23 @@ model Payment {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
+}
+
+// One Piece TCG
+model Card {
+  id        Int     @id @default(autoincrement())
+  uid       String  @unique @default(dbgenerated("('card_'::text || nanoid())"))
+  code      String // "EB01-001"
+  rarity    String // L
+  type      String // Leader
+  name      String // "Kozuki Oden"
+  cost      Int? // 4 
+  attribute String // "Slash"
+  power     Int? // 5000
+  counter   Int? // null
+  color     String // "Red/Green"
+  class     String // "Land of Wano/Kouzuki Clan"
+  effect    String? // "All of your {Land of Wano} type Character cards without a Counter..."
+  set       String // "-Memorial Collection-[EB-01]"
+  image     String // "https://en.onepiece-cardgame.com/images/cardlist/card/EB01-001.png?241220"
 }
