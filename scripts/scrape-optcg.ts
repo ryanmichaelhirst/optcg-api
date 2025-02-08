@@ -3,6 +3,9 @@ import fs from "fs"
 import path from "path"
 import { chromium } from "playwright"
 
+const COLORS = ["Red", "Green", "Blue", "Purple", "Black", "Yellow"]
+
+// pnpm tsx scripts/scrape-optcg.ts
 const main = async () => {
   const browser = await chromium.launch({ headless: false }) // Set headless: false to see the browser actions
   const page = await browser.newPage()
@@ -51,55 +54,67 @@ const main = async () => {
 
   // Click the SEARCH button and wait for the results to load
   await page.waitForSelector("div.commonBtn.submitBtn", { timeout: 10000 })
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: "networkidle" }), // Wait for the page to reload or update
-    page.click("div.commonBtn.submitBtn"),
-  ])
-  console.log("SEARCH button clicked, waiting for results.")
+  await page.click("div.commonBtn.submitBtn"),
+    console.log("SEARCH button clicked, waiting for results.")
 
-  // Wait for the resultCol container to be visible
-  await page.waitForSelector("div.resultCol", { timeout: 10000 })
-  console.log('Waiting for "resultCol" to be visible.')
+  const cardDataList: CardData[] = []
 
-  // Ensure at least one card element is attached to the DOM
-  await page.waitForFunction(
-    () => {
-      return document.querySelectorAll("div.resultCol dl.modalCol").length > 0
-    },
-    { timeout: 10000 },
-  )
+  let hasNextPage = true
 
-  // Get all hidden dl.modalCol elements inside resultCol
-  const cardElements = await page.$$("div.resultCol dl.modalCol")
-  console.log("Got card elements", cardElements.length)
+  while (hasNextPage) {
+    // Wait for the resultCol container to be visible
+    await page.waitForSelector("div.resultCol", { timeout: 10000 })
+    console.log('Waiting for "resultCol" to be visible.')
 
-  if (cardElements.length > 0) {
-    const cardDataList: CardData[] = []
+    // Ensure at least one card element is attached to the DOM
+    await page.waitForFunction(
+      () => {
+        return document.querySelectorAll("div.resultCol dl.modalCol").length > 0
+      },
+      { timeout: 10000 },
+    )
+
+    // Get all hidden dl.modalCol elements inside resultCol
+    const cardElements = await page.$$("div.resultCol dl.modalCol")
+    console.log("Got card elements", cardElements.length)
 
     for (const cardElement of cardElements) {
       try {
-        // Extract the raw HTML and parse it manually
         const cardHtml = await cardElement.innerHTML()
-        const cardData = await extractCardDataFromHtml(cardHtml)
+        const cardData = extractCardDataFromHtml(cardHtml)
         cardDataList.push(cardData)
       } catch (error) {
         console.error("Error extracting card data:", error)
       }
     }
 
-    // Define the tmp directory at the project root using process.cwd()
-    const tmpDir = path.join(process.cwd(), "tmp")
-    // Ensure the /tmp directory exists
-    if (!fs.existsSync(tmpDir)) {
-      fs.mkdirSync(tmpDir, { recursive: true })
+    // Check if the NEXT button is disabled
+    const nextButtonDisabled = await page.$("a.nextBtn.disable")
+    if (nextButtonDisabled) {
+      hasNextPage = false
+      console.log("No more pages to scrape.")
+    } else {
+      // Ensure the NEXT button is visible before clicking
+      const nextButton = await page.waitForSelector("div.pagerCol a.nextBtn", { timeout: 10000 })
+      if (nextButton) {
+        console.log("Navigating to the next page...")
+        await nextButton.click()
+      } else {
+        console.log("NEXT button not found, stopping pagination.")
+        hasNextPage = false
+      }
     }
-    // Save the card data list to a JSON file inside /tmp
-    const filePath = path.join(tmpDir, "cardDataList.json")
-    fs.writeFileSync(filePath, JSON.stringify(cardDataList, null, 2), "utf-8")
-    console.log(`Card data saved to ${filePath}`)
-  } else {
-    console.log("No card elements found inside resultCol.")
   }
+
+  // Define the tmp directory at the project root using process.cwd()
+  const tmpDir = path.join(process.cwd(), "tmp")
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true })
+  }
+
+  const filePath = path.join(tmpDir, "cardDataList.json")
+  fs.writeFileSync(filePath, JSON.stringify(cardDataList, null, 2), "utf-8")
+  console.log(`Card data saved to ${filePath}`)
 
   await browser.close()
 }
