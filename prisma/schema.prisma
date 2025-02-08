@@ -49,7 +49,7 @@ model Card {
   rarity    String // L
   type      String // Leader
   name      String // "Kozuki Oden"
-  life      Int? // 4 
+  cost      Int? // 4 
   attribute String // "Slash"
   power     Int? // 5000
   counter   Int? // null
@@ -57,4 +57,5 @@ model Card {
   class     String // "Land of Wano/Kouzuki Clan"
   effect    String? // "All of your {Land of Wano} type Character cards without a Counter..."
   set       String // "-Memorial Collection-[EB-01]"
+  image     String // "https://en.onepiece-cardgame.com/images/cardlist/card/EB01-001.png?241220"
 }

@@ -32,7 +32,7 @@ async function seed() {
         await db.card.create({
           data: {
             name: card.cardName,
-            life: Number(card.life.replace(/cost/gi, "")),
+            cost: Number(card.cost.replace(/cost/gi, "")),
             attribute: card.attribute,
             power: Number(card.power),
             counter: Number(card.counter),
@@ -43,6 +43,7 @@ async function seed() {
             code: card.infoCol[0],
             rarity: card.infoCol[1],
             type: card.infoCol[2],
+            image: card.image,
           },
         })
       }

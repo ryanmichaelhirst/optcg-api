@@ -8,15 +8,16 @@ import { chromium } from "playwright"
 const COLORS = ["Red", "Green", "Blue", "Purple", "Black", "Yellow"]
 
 const program = Effect.gen(function* () {
-  const { browser, page } = yield* setup("test")
+  const scriptFlag = yield* Config.string("SCRIPT_FLAG")
+  const { browser, page } = yield* setup(scriptFlag)
 
+  console.log("Opening onepiece site")
   yield* Effect.promise(() =>
     page.goto("https://en.onepiece-cardgame.com/cardlist", {
       timeout: 180000,
     }),
   )
 
-  // Handle cookie consent
   const cookieCloseButtonSelector = "button.onetrust-close-btn-handler"
   try {
     const cookieButton = yield* Effect.promise(() =>
@@ -32,113 +33,67 @@ const program = Effect.gen(function* () {
     console.log("Cookie consent banner did not appear.")
   }
 
-  // Click the series selection button
-  yield* Effect.promise(() =>
-    page.waitForSelector('div.seriesCol button.selModalButton[data-selmodalbtn="series"]'),
-  )
-  yield* Effect.promise(() =>
-    page.click('div.seriesCol button.selModalButton[data-selmodalbtn="series"]'),
-  )
-  console.log("Clicked the series selection button.")
+  const setSelector = 'div.seriesCol button.selModalButton[data-selmodalbtn="series"]'
+  yield* Effect.promise(() => page.waitForSelector(setSelector))
+  yield* Effect.promise(() => page.click(setSelector))
+  console.log("Clicked the card set selection button.")
 
-  // Select "ALL" in the series dropdown
   yield* Effect.promise(() => page.waitForSelector("div.selModal"))
-  yield* Effect.promise(() =>
-    page.waitForSelector('div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")'),
-  )
-  yield* Effect.promise(() =>
-    page.click('div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")'),
-  )
+  console.log("Card set modal appeared")
+  const allOptionSelector = 'div.selModalList ul li.selModalClose[data-value=""]:has-text("ALL")'
+  yield* Effect.promise(() => page.waitForSelector(allOptionSelector))
+  yield* Effect.promise(() => page.click(allOptionSelector))
   console.log("Selected ALL in dropdown.")
 
   for (const color of COLORS) {
-    let hasNextPage = true
-    let pageNum = 0
     const colorCardData: SeedCardData[] = []
-    console.log(`Starting to scrape cards for color: ${color}`)
+    console.log(`Starting to scrape cards for color ${color}`)
 
-    // Apply the color filter
     const colorSelector = `label.checkBtn.isColor_${color}[for="color_${color}"]`
     yield* Effect.promise(() => page.waitForSelector(colorSelector))
     yield* Effect.promise(() => page.click(colorSelector))
-    console.log(`Applied ${color} color filter.`)
+    console.log(`Applied ${color} filter`)
 
-    // Click the SEARCH button and wait for results
-    yield* Effect.promise(() => page.waitForSelector("div.commonBtn.submitBtn"))
-    yield* Effect.promise(() => page.click("div.commonBtn.submitBtn"))
-    console.log(`SEARCH button clicked for color: ${color}, waiting for results.`)
+    const searchBtnSelector = "div.commonBtn.submitBtn"
+    yield* Effect.promise(() => page.waitForSelector(searchBtnSelector))
+    yield* Effect.promise(() => page.click(searchBtnSelector))
+    console.log(`SEARCH for ${color} cards`)
 
-    while (hasNextPage) {
-      console.log(`Scraping page ${pageNum + 1} for color ${color}`)
-      Effect.promise(() => page.waitForSelector("div.resultCol"))
+    // Ensure at least one card element is attached to the DOM
+    yield* Effect.promise(() => page.waitForSelector("div.resultCol"))
+    console.log(`Scraping cards for color ${color}`)
 
-      // Ensure at least one card element is attached to the DOM
-      yield* Effect.promise(() =>
-        page.waitForFunction(() => {
-          return document.querySelectorAll("div.resultCol dl.modalCol").length > 0
-        }),
-      )
+    // Get all hidden <dl> elements containing the card data
+    // We do not need to paginate through the list, they are all preloaded in the DOM
+    const cardElements = yield* Effect.promise(() => page.$$("div.resultCol dl.modalCol"))
+    console.log(`Found ${cardElements.length} cards`)
 
-      // Get all hidden dl.modalCol elements inside resultCol
-      const cardElements = yield* Effect.promise(() => page.$$("div.resultCol dl.modalCol"))
-      console.log(`Found ${cardElements.length} cards for color: ${color}`)
-
-      for (const cardElement of cardElements) {
-        try {
-          const cardHtml = yield* Effect.promise(() => cardElement.innerHTML())
-          const cardData = extractCardDataFromHtml(cardHtml)
-          cardData.colorFilter = color // Add color filter info
-          colorCardData.push(cardData)
-        } catch (error) {
-          console.error(`Error extracting card data for color ${color}:`, error)
-        }
-      }
-
-      // Check if NEXT button is disabled
-      const nextButtonDisabled = yield* Effect.promise(() =>
-        page.$("div.pagerCol a.nextBtn.disable"),
-      )
-      if (nextButtonDisabled) {
-        hasNextPage = false
-        console.log(`Finished scraping all pages for color: ${color}`)
-      } else {
-        const nextButton = yield* Effect.promise(() =>
-          page.waitForSelector("div.pagerCol a.nextBtn", {
-            state: "visible",
-          }),
-        )
-
-        if (nextButton) {
-          pageNum++
-          yield* Effect.promise(() => nextButton.scrollIntoViewIfNeeded())
-          yield* Effect.promise(() => nextButton.click())
-          // console.log(`Navigating to next page for color: ${color}`)
-        } else {
-          console.log(`NEXT button not found for color: ${color}, stopping pagination.`)
-          hasNextPage = false
-        }
+    for (const cardElement of cardElements) {
+      try {
+        const cardHtml = yield* Effect.promise(() => cardElement.innerHTML())
+        const cardData = extractCardDataFromHtml(cardHtml)
+        colorCardData.push(cardData)
+      } catch (error) {
+        console.error(`Error extracting card data for color ${color}:`, error)
       }
     }
 
-    // Deselect the color before moving to the next
-    yield* Effect.promise(() => page.click(colorSelector))
-    console.log(`Finished scraping ${pageNum} pages for color ${color}`)
+    console.log(`Finished scraping for color ${color}`)
 
-    // Save all card data
     const tmpDir = path.join(process.cwd(), "tmp")
     if (!fs.existsSync(tmpDir)) {
       fs.mkdirSync(tmpDir, { recursive: true })
     }
-
     const filePath = path.join(tmpDir, `${color}_cardlist.json`)
     fs.writeFileSync(filePath, JSON.stringify(colorCardData, null, 2), "utf-8")
-    console.log(`Color card data saved to ${filePath}`)
+    console.log(`Saved file ${filePath}`)
   }
 
   yield* Effect.promise(() => browser.close())
 })
 
-function setup(type: "test" | "dev" | "prod") {
+function setup(type: string) {
+  console.log(`Running playwright in ${type} mode`)
   return Effect.gen(function* () {
     const redactedPw = yield* Config.redacted("PROXY_PASSWORD")
     const browser = yield* Effect.promise(() =>
@@ -164,6 +119,7 @@ function setup(type: "test" | "dev" | "prod") {
       const pageContent = yield* Effect.promise(() => page.textContent("body"))
       return yield* Effect.fail("Testing rotating IP to make sure it's working: " + pageContent)
     }
+    console.log("Finished setting up playwright")
 
     return { browser, page }
   })
@@ -171,7 +127,7 @@ function setup(type: "test" | "dev" | "prod") {
 
 export interface SeedCardData {
   cardName: string
-  life: string
+  cost: string
   attribute: string
   power: string
   counter: string
@@ -180,7 +136,7 @@ export interface SeedCardData {
   effect: string
   cardSet: string
   infoCol: string[]
-  colorFilter?: string // To store the applied color filter
+  image: string
 }
 function extractCardDataFromHtml(html: string): SeedCardData {
   const $ = cheerio.load(html)
@@ -189,9 +145,16 @@ function extractCardDataFromHtml(html: string): SeedCardData {
     return $(selector).text().trim() || ""
   }
 
+  // Extract image URL, preferring data-src if available
+  const getImageUrl = () => {
+    const imageUrl = $("img.lazy").attr("data-src") || $("img.lazy").attr("src")
+    if (!imageUrl) throw new Error("Image URL not found")
+    return new URL(imageUrl.replace("../", ""), "http://en.onepiece-cardgame.com/").href
+  }
+
   return {
     cardName: getText(".cardName"),
-    life: getText(".cost").replace("Life", "").replace("Cost", "").trim(),
+    cost: getText(".cost").replace("Life", "").replace("Cost", "").trim(),
     attribute: getText(".attribute i"),
     power: getText(".power").replace("Power", "").trim(),
     counter: getText(".counter").replace("Counter", "").trim(),
@@ -202,7 +165,8 @@ function extractCardDataFromHtml(html: string): SeedCardData {
     infoCol: $(".infoCol span")
       .map((_, span) => $(span).text().trim())
       .get(),
+    image: getImageUrl(),
   }
 }
 
-Effect.runPromise(program)
+Effect.runPromiseExit(program).then(console.log)
