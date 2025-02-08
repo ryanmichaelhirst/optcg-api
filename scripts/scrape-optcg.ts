@@ -4,12 +4,20 @@ import { Config, Effect, Redacted } from "effect"
 import fs from "fs"
 import path from "path"
 import { chromium } from "playwright"
-
-const COLORS = ["Red", "Green", "Blue", "Purple", "Black", "Yellow"]
+import yargs from "yargs"
 
 const program = Effect.gen(function* () {
-  const scriptFlag = yield* Config.string("SCRIPT_FLAG")
-  const { browser, page } = yield* setup(scriptFlag)
+  const argv = yargs(process.argv.slice(2))
+    .options({
+      color: { type: "string", default: "red" },
+      mode: { type: "string", default: "prod" },
+    })
+    .parseSync()
+  // red -> Red
+  const color = argv.color.charAt(0).toUpperCase() + argv.color.slice(1)
+  const mode = argv.mode
+
+  const { browser, page } = yield* setup(mode)
 
   console.log("Opening onepiece site")
   yield* Effect.promise(() =>
@@ -45,49 +53,47 @@ const program = Effect.gen(function* () {
   yield* Effect.promise(() => page.click(allOptionSelector))
   console.log("Selected ALL in dropdown.")
 
-  for (const color of COLORS) {
-    const colorCardData: SeedCardData[] = []
-    console.log(`Starting to scrape cards for color ${color}`)
+  const colorCardData: SeedCardData[] = []
+  console.log(`Starting to scrape cards for color ${color}`)
 
-    const colorSelector = `label.checkBtn.isColor_${color}[for="color_${color}"]`
-    yield* Effect.promise(() => page.waitForSelector(colorSelector))
-    yield* Effect.promise(() => page.click(colorSelector))
-    console.log(`Applied ${color} filter`)
+  const colorSelector = `label.checkBtn.isColor_${color}[for="color_${color}"]`
+  yield* Effect.promise(() => page.waitForSelector(colorSelector))
+  yield* Effect.promise(() => page.click(colorSelector))
+  console.log(`Applied ${color} filter`)
 
-    const searchBtnSelector = "div.commonBtn.submitBtn"
-    yield* Effect.promise(() => page.waitForSelector(searchBtnSelector))
-    yield* Effect.promise(() => page.click(searchBtnSelector))
-    console.log(`SEARCH for ${color} cards`)
+  const searchBtnSelector = "div.commonBtn.submitBtn"
+  yield* Effect.promise(() => page.waitForSelector(searchBtnSelector))
+  yield* Effect.promise(() => page.click(searchBtnSelector))
+  console.log(`SEARCH for ${color} cards`)
 
-    // Ensure at least one card element is attached to the DOM
-    yield* Effect.promise(() => page.waitForSelector("div.resultCol"))
-    console.log(`Scraping cards for color ${color}`)
+  // Ensure at least one card element is attached to the DOM
+  yield* Effect.promise(() => page.waitForSelector("div.resultCol"))
+  console.log(`Scraping cards for color ${color}`)
 
-    // Get all hidden <dl> elements containing the card data
-    // We do not need to paginate through the list, they are all preloaded in the DOM
-    const cardElements = yield* Effect.promise(() => page.$$("div.resultCol dl.modalCol"))
-    console.log(`Found ${cardElements.length} cards`)
+  // Get all hidden <dl> elements containing the card data
+  // We do not need to paginate through the list, they are all preloaded in the DOM
+  const cardElements = yield* Effect.promise(() => page.$$("div.resultCol dl.modalCol"))
+  console.log(`Found ${cardElements.length} cards`)
 
-    for (const cardElement of cardElements) {
-      try {
-        const cardHtml = yield* Effect.promise(() => cardElement.innerHTML())
-        const cardData = extractCardDataFromHtml(cardHtml)
-        colorCardData.push(cardData)
-      } catch (error) {
-        console.error(`Error extracting card data for color ${color}:`, error)
-      }
+  for (const cardElement of cardElements) {
+    try {
+      const cardHtml = yield* Effect.promise(() => cardElement.innerHTML())
+      const cardData = extractCardDataFromHtml(cardHtml)
+      colorCardData.push(cardData)
+    } catch (error) {
+      console.error(`Error extracting card data for color ${color}:`, error)
     }
-
-    console.log(`Finished scraping for color ${color}`)
-
-    const tmpDir = path.join(process.cwd(), "tmp")
-    if (!fs.existsSync(tmpDir)) {
-      fs.mkdirSync(tmpDir, { recursive: true })
-    }
-    const filePath = path.join(tmpDir, `${color}_cardlist.json`)
-    fs.writeFileSync(filePath, JSON.stringify(colorCardData, null, 2), "utf-8")
-    console.log(`Saved file ${filePath}`)
   }
+
+  console.log(`Finished scraping for color ${color}`)
+
+  const tmpDir = path.join(process.cwd(), "tmp")
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true })
+  }
+  const filePath = path.join(tmpDir, `${color}_cardlist.json`)
+  fs.writeFileSync(filePath, JSON.stringify(colorCardData, null, 2), "utf-8")
+  console.log(`Saved file ${filePath}`)
 
   yield* Effect.promise(() => browser.close())
 })
