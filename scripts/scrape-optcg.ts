@@ -6,10 +6,28 @@ import { chromium } from "playwright"
 const COLORS = ["Red", "Green", "Blue", "Purple", "Black", "Yellow"]
 
 const main = async () => {
-  const browser = await chromium.launch({ headless: false })
-  const page = await browser.newPage()
+  const browser = await chromium.launch({
+    headless: true,
+    // proxy: {
+    //   // Use rotating proxy to avoid IP ban
+    //   server: `http://residential-proxy.scrapeops.io:8181`,
+    //   username: "scrapeops",
+    //   password: "",
+    // },
+  })
+  const context = await browser.newContext({ ignoreHTTPSErrors: true })
+  const page = await context.newPage()
 
-  await page.goto("https://en.onepiece-cardgame.com/cardlist", { waitUntil: "networkidle" })
+  // https://scrapeops.io/docs/residential-mobile-proxy-aggregator/integration-examples/nodejs-playwright-example/
+  // Test rotating IP to make sure it's working
+  // await page.goto("https://httpbin.org/ip")
+  // const pageContent = await page.textContent("body")
+  // console.log(pageContent)
+  // return
+
+  await page.goto("https://en.onepiece-cardgame.com/cardlist", {
+    timeout: 180000,
+  })
 
   // Handle cookie consent
   const cookieCloseButtonSelector = "button.onetrust-close-btn-handler"
