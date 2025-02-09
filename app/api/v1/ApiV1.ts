@@ -9,7 +9,7 @@ export class ApiV1 extends HttpApi.make("ApiV1")
   .prefix(API_PATH)
   .annotateContext(
     OpenApi.annotations({
-      title: "API V1",
-      description: "Public API V1",
+      title: "Api v1",
+      description: "OPTCG api v1",
     }),
   ) {}
