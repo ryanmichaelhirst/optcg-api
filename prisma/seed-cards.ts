@@ -1,14 +1,7 @@
 import { db } from "@/lib/db.server"
-import { Effect } from "effect"
-// import { fakerEN_US as faker } from "@faker-js/faker"
-
 import fs from "fs"
 import path from "path"
 import { SeedCardData } from "scripts/scrape-optcg"
-
-const program = Effect.gen(function* () {
-  yield* Effect.promise(() => seedCards())
-})
 
 export async function seedCards() {
   const files = fs.readdirSync(path.join(process.cwd(), "tmp"))
@@ -21,6 +14,8 @@ export async function seedCards() {
 
     const content = fs.readFileSync(filePath, "utf-8")
     const jsonData: SeedCardData[] = JSON.parse(content)
+    console.log(`seeding ${jsonData.length} cards for ${filePath}`)
+
     for (const card of jsonData) {
       await db.card.create({
         data: {
@@ -44,5 +39,3 @@ export async function seedCards() {
     }
   }
 }
-
-Effect.runPromiseExit(program).then(console.log)
