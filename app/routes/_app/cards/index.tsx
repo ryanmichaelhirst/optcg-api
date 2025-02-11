@@ -1,48 +1,37 @@
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { useCards } from "@/api/v1/hooks/cards"
 import { db } from "@/lib/db.server"
 import { app } from "@/utils/app.server"
 import { LoaderFunctionArgs } from "@remix-run/node"
-import { typedjson, useTypedLoaderData } from "remix-typedjson"
+import { Either } from "effect"
+import { typedjson } from "remix-typedjson"
 
 export const loader = async (args: LoaderFunctionArgs) =>
   app(args).build(async (ctx) => {
     const cards = await db.card.findMany({
-      take: 100,
+      take: 20,
     })
 
     return typedjson({ cards })
   })
 
 export default function Page() {
-  const data = useTypedLoaderData<typeof loader>()
+  const cardsResp = useCards()
+  const cards =
+    cardsResp.data?.pipe(
+      Either.match({
+        onLeft: (error) => [],
+        onRight: (value) => value.data,
+      }),
+    ) ?? []
 
   return (
     <div>
-      <p>Card list</p>
-      {data.cards.map((card) => (
-        <Card key={card.id}>
-          <CardHeader>
-            <CardTitle>{card.name}</CardTitle>
-            <CardDescription>{card.type}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <img src={card.image} className="size-4/12 rounded" />
-            <div>{card.class}</div>
-            <div>{card.effect}</div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button>Copy</Button>
-          </CardFooter>
-        </Card>
-      ))}
+      <h1>Cards</h1>
+      <div className="grid grid-cols-5 gap-4">
+        {cards.map((card) => (
+          <img src={card.image} key={card.id} className="rounded" />
+        ))}
+      </div>
     </div>
   )
 }

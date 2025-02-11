@@ -45,6 +45,7 @@
     "@routes-gen/remix": "^0.3.7",
     "@stripe/react-stripe-js": "^2.7.0",
     "@stripe/stripe-js": "^3.3.0",
+    "@tanstack/react-query": "^5.66.0",
     "chokidar": "^3.5.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",

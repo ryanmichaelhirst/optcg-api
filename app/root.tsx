@@ -1,8 +1,8 @@
+import stylesheet from "@/styles/tailwind.css"
 import { cssBundleHref } from "@remix-run/css-bundle"
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node"
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react"
-
-import stylesheet from "@/styles/tailwind.css"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { typedjson, useTypedLoaderData } from "remix-typedjson"
 import { cn } from "./utils"
 import { app } from "./utils/app.server"
@@ -20,6 +20,8 @@ export const loader = async (args: LoaderFunctionArgs) =>
     return typedjson({ theme })
   })
 
+const queryClient = new QueryClient()
+
 export default function App() {
   const data = useTypedLoaderData<typeof loader>()
 
@@ -32,7 +34,10 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        <Outlet />
+        <QueryClientProvider client={queryClient}>
+          <Outlet />
+        </QueryClientProvider>
+
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
