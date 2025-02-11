@@ -1,0 +1,74 @@
+import { Property, Properties, ApiHeading } from "@/components/Mdx"
+
+# Cards
+
+<div className="mb-10 text-muted-foreground">
+  Represents a physical card from the One Piece TCG. Only GET endpoints are available at this time.
+</div>
+
+#### Properties
+
+<Properties>
+  <Property name="id" type="string">
+    Unique identifier for the card.
+  </Property>
+  <Property name="code" type="string">
+    Serial #. Same as id
+  </Property>
+  <Property name="rarity" type="string">
+    Rarity, one of: L | SR | R | C | UC
+  </Property>
+  <Property name="type" type="string">
+    Type, one of: Leader | Character | Event
+  </Property>
+  <Property name="name" type="string">
+    Name
+  </Property>
+  <Property name="cost" type="number">
+    Cost
+  </Property>
+  <Property name="attribute" type="string">
+    Attribute, one of: Special | Slash | Pierce
+  </Property>
+  <Property name="power" type="number">
+    Attack power (e.g. 5000)
+  </Property>
+  <Property name="counter" type="number">
+    Counter (e.g. 2000)
+  </Property>
+  <Property name="color" type="number">
+    Color, one of: Red | Blue | Green | Yellow | Black
+  </Property>
+  <Property name="class" type="number">
+    Class (e.g. Straw hats)
+  </Property>
+  <Property name="effect" type="number">
+    Effect description
+  </Property>
+  <Property name="set" type="number">
+    Set name
+  </Property>
+  <Property name="image" type="number">
+    Image url
+  </Property>
+</Properties>
+
+---
+
+<br />
+<ApiHeading type="GET" path="/api/v1/cards" />
+
+#### List all cards
+
+<div className="mb-10 text-muted-foreground">
+  Retrieve a paginated list of cards. By default the list is sorted by card name in ascending order.
+</div>
+
+---
+
+<br />
+<ApiHeading type="GET" path="/api/v1/cards/:id" />
+
+#### Find card by id
+
+<div className="mb-10 text-muted-foreground">Get a card by id.</div>

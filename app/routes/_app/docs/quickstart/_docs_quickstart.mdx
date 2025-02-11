@@ -1,0 +1,20 @@
+import { ButtonLink } from "@/components/ButtonLink"
+
+# Quickstart
+
+This guide will get you all set up and ready to use the OPTCG API. We'll cover how to make your first api request.
+
+<br />
+<br />
+
+### Making your first api request
+
+```bash
+curl -G https://optcgapi.ryanmichaelhirst.us/api/v1/cards \
+  -H "Authorization: Bearer {token}" \
+  -d limit=20
+```
+
+<br />
+
+Read the docs for the [cards list](/docs/cards) endpoint to learn more about the available query parameters.

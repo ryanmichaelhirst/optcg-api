@@ -14,7 +14,8 @@ export const links: LinksFunction = () => [
 
 export const loader = async (args: LoaderFunctionArgs) =>
   app(args).build(async (ctx) => {
-    const theme = ctx.session.get("theme")
+    // const theme = ctx.session.get("theme")
+    const theme = "light"
 
     return typedjson({ theme })
   })

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db.server"
 import { fakerEN_US as faker } from "@faker-js/faker"
-import { seedCards } from "scripts/db-seed"
+import { seedCards } from "./seed-cards"
 
 export async function seed() {
   const iterations = Array.from(Array(10).keys())
