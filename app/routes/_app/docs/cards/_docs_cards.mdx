@@ -1,0 +1,32 @@
+import { Property, Properties, ApiHeading } from "@/components/Mdx"
+
+# Cards
+
+<div className="mb-10 text-muted-foreground">
+  Represents a single card from the One Piece TCG. Only GET endpoints are available at this time.
+</div>
+<br />
+
+### The card model
+
+<div className="mb-10 text-muted-foreground">
+  The card model contains all information present on an official physical One Piece TCG card.
+</div>
+
+#### Properties
+
+<Properties>
+  <Property name="id" type="string">
+    Unique identifier for the card.
+  </Property>
+</Properties>
+
+---
+
+<br />
+<br />
+<ApiHeading type="GET" path="/api/v1/cards" />
+
+#### List all cards
+
+Retrieve a paginated list of cards. By default the list is sorted by card name in ascending order.
