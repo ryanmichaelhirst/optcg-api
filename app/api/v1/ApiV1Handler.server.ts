@@ -4,13 +4,16 @@ import { Layer } from "effect"
 import { ApiV1Live } from "./ApiV1Http.server"
 
 const ApiEnv = Layer.empty.pipe(
-  Layer.provideMerge(ApiV1Live), // API logic
+  // API logic
+  Layer.provideMerge(ApiV1Live),
+  // Swagger docs
   Layer.provideMerge(
     HttpApiSwagger.layer({
       path: "/swagger",
     }).pipe(Layer.provide(ApiV1Live)),
-  ), // Swagger docs
-  Layer.provideMerge(NodeHttpServer.layerContext), //  Node.js HTTP
+  ),
+  // HTTP context
+  Layer.provideMerge(NodeHttpServer.layerContext),
 )
 
 export const { dispose, handler } = HttpApiBuilder.toWebHandler(ApiEnv)

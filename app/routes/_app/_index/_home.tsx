@@ -1,7 +1,9 @@
 import landingBg from "@/assets/landing_bg.png"
+import { ButtonLink } from "@/components/ButtonLink"
 import { Button } from "@/components/ui/button"
 import { type MetaFunction } from "@remix-run/node"
 import { useNavigate } from "@remix-run/react"
+import { route } from "routes-gen"
 export const meta: MetaFunction = () => [{ title: "OPTCG Api | Home" }]
 
 export default function Page() {
@@ -24,14 +26,10 @@ export default function Page() {
             building and personal projects.
           </p>
           <div className="flex items-center justify-center gap-x-4">
-            <Button
-              onClick={() => {
-                window.open("/docs", "_self")
-              }}
-              variant="outline"
-            >
+            <ButtonLink to={route("/docs")} variant="outline">
               Get started
-            </Button>
+            </ButtonLink>
+
             <Button
               onClick={() => window.open("https://github.com/ryanmichaelhirst/optcg-api", "_blank")}
             >

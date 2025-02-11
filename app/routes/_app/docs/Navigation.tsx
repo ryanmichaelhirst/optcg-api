@@ -80,7 +80,7 @@ function NavigationGroup({ group, className }: { group: NavGroup; className?: st
   )
 }
 
-export const navigation: Array<NavGroup> = [
+const navigation: Array<NavGroup> = [
   {
     title: "Guides",
     links: [
