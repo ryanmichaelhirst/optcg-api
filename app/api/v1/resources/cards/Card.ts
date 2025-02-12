@@ -2,7 +2,6 @@ import { Schema } from "effect"
 
 export class Card extends Schema.TaggedClass<Card>()("Card", {
   id: Schema.String,
-  uid: Schema.String,
   code: Schema.String,
   rarity: Schema.String,
   type: Schema.String,

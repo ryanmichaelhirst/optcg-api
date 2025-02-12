@@ -5,8 +5,7 @@ import { Card } from "./Card"
 export const serializeCard = (card: TCard) => {
   return Effect.gen(function* () {
     return Card.make({
-      id: card.code,
-      uid: card.uid,
+      id: card.uid,
       code: card.code,
       rarity: card.rarity,
       type: card.type,

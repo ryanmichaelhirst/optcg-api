@@ -4,7 +4,7 @@ import { Effect } from "effect"
 import { ApiV1Client } from "../ApiV1Client"
 import { ApiV1Runtime } from "../ApiV1Runtime"
 
-export function useCards(args?: { page?: number; perPage?: number; cardId?: string }) {
+export function useCards(args?: { page?: number; perPage?: number; search?: string | null }) {
   return useQuery({
     queryKey: ["cards", args],
     queryFn: () =>
@@ -15,9 +15,9 @@ export function useCards(args?: { page?: number; perPage?: number; cardId?: stri
           urlParams: {
             page: args?.page ?? 1,
             per_page: args?.perPage ?? 20,
-            card_id: args?.cardId,
+            ...(args?.search && { search: args.search }),
           },
         })
-      }).pipe(Effect.either, ApiV1Runtime.runPromise),
+      }).pipe(ApiV1Runtime.runPromise),
   })
 }

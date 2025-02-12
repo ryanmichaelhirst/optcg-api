@@ -10,7 +10,7 @@ export class CardsApi extends HttpApiGroup.make("cards")
       .setUrlParams(
         Schema.Struct({
           ...PaginationQuery.fields,
-          card_id: Schema.optional(Schema.String),
+          search: Schema.optional(Schema.String),
         }),
       )
       .addSuccess(buildPaginationResult(Card)),
