@@ -24,3 +24,10 @@ Seed database
 
 View db
 `pnpm prisma studio`
+
+## Caching images
+
+Setup Cloudflare R2: https://developers.cloudflare.com/r2/get-started/
+
+Run script to seed image bucket
+`pnpm tsx scripts/seed-cloudflare-r2`
