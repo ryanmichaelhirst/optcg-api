@@ -25,9 +25,13 @@ Seed database
 View db
 `pnpm prisma studio`
 
+Need to reset and re-seed the Card table?
+`pnpm tsx scripts/cards-seed`
+
 ## Caching images
 
 Setup Cloudflare R2: https://developers.cloudflare.com/r2/get-started/
 
-Run script to seed image bucket
-`pnpm tsx scripts/seed-cloudflare-r2`
+Run the cloudflare script with `pnpm tsx scripts/cf-r2-seed`
+
+Same rules apply from Web Scraper section.
