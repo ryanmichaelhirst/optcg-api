@@ -38,7 +38,7 @@ export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", (args) =
       total,
       current_page: args.urlParams.page,
       per_page: args.urlParams.per_page,
-      total_pages: Math.ceil(total | args.urlParams.per_page),
+      total_pages: Math.ceil(total / args.urlParams.per_page),
     }
   }),
 )

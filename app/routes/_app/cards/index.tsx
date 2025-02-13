@@ -1,5 +1,6 @@
 import { useCards } from "@/api/v1/hooks/cards"
 import Container from "@/components/Container"
+import { Pagination } from "@/components/Pagination"
 import {
   Form,
   FormControl,
@@ -9,23 +10,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import {
-//   Sheet,
-//   SheetContent,
-//   SheetDescription,
-//   SheetHeader,
-//   SheetTitle,
-// } from "@/components/ui/sheet"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/utils"
+import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
 import { effectTsResolver } from "@hookform/resolvers/effect-ts"
 import { useSearchParams } from "@remix-run/react"
-import { IconInfoCircle } from "@tabler/icons-react"
 import { Schema } from "effect"
+import React from "react"
 import { useForm } from "react-hook-form"
-import { useDebounceValue } from "usehooks-ts"
+import { useDebounceCallback } from "usehooks-ts"
 
 const formSchema = Schema.Struct({
   search: Schema.String,
@@ -41,19 +35,19 @@ export default function Page() {
   })
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get("page")) || 1
-  const perPage = Number(searchParams.get("per_page")) || 20
+  const perPage = Number(searchParams.get("per_page")) || 10
   const search = searchParams.get("search")
   const cardId = searchParams.get("card_id")
-  const [debouncedSearch] = useDebounceValue(search, 500)
+  const debouncedSetSearchParams = useDebounceCallback(setSearchParams, 500)
 
   const cardsList = useCards({
     page,
     perPage,
-    search: debouncedSearch || null,
+    search: search || null,
   })
 
   const cards = cardsList.data?.data ?? []
-  const card = cards.find((c) => c.id === cardId)
+  const total = cardsList.data?.total ?? 0
 
   return (
     <Container>
@@ -65,8 +59,9 @@ export default function Page() {
             onInput={(e) => {
               const form = e.currentTarget
               const search = form.elements.namedItem("search") as HTMLInputElement
-              searchParams.set("search", search.value)
-              setSearchParams(searchParams)
+              searchParams.set(SEARCH_PARAM_KEYS.SEARCH, search.value)
+              searchParams.set(SEARCH_PARAM_KEYS.PAGE, String(1))
+              debouncedSetSearchParams(searchParams)
             }}
           >
             <FormField
@@ -88,7 +83,7 @@ export default function Page() {
           </form>
         </Form>
       </div>
-      <div className="grid grid-cols-5 gap-4">
+      <div className="mb-4 grid grid-cols-5 gap-4">
         {cards.map((card) => (
           <HoverCard key={card.id}>
             <HoverCardTrigger asChild>
@@ -97,7 +92,7 @@ export default function Page() {
                 src={card.image}
                 className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
                 onClick={() => {
-                  searchParams.set("card_id", card.id)
+                  searchParams.set(SEARCH_PARAM_KEYS.CARD_ID, card.id)
                   setSearchParams(searchParams)
                 }}
               />
@@ -106,60 +101,47 @@ export default function Page() {
               <div className="flex justify-between space-x-4">
                 <div className="space-y-1">
                   <h4 className="text-sm font-semibold">{card?.name}</h4>
-                  <p className="text-sm">{card?.effect}</p>
-                  <div className="flex items-center pt-2">
-                    <IconInfoCircle className="h-6 w-6" />
-                    <span className="text-xs text-muted-foreground">{card?.class}</span>
-                  </div>
+                  <p className="text-sm">{card?.effect ?? "No effect"}</p>
+                  <DescriptionList
+                    items={[
+                      { name: "Code", value: card.code },
+
+                      { name: "Attribute", value: card.attribute },
+                      { name: "Class", value: card.class },
+                      { name: "Set", value: card.set },
+                    ]}
+                  />
                 </div>
               </div>
             </HoverCardContent>
           </HoverCard>
         ))}
       </div>
+      <Pagination page={page} perPage={perPage} total={total} />
     </Container>
   )
 }
 
-// function CardSheet(props: { card: any; open: boolean; onOpenChange: (open: boolean) => void }) {
-//   const { card } = props
-
-//   return (
-//     <Sheet open={props.open} onOpenChange={props.onOpenChange}>
-//       <SheetContent>
-//         <SheetHeader>
-//           <SheetTitle>{card?.name}</SheetTitle>
-//           <SheetDescription>
-//             {card?.rarity} | {card?.type}
-//           </SheetDescription>
-//         </SheetHeader>
-//         <div className="grid gap-4 py-4">
-//           <div className="grid grid-cols-4 items-center gap-4">
-//             <Label htmlFor="id" className="text-right">
-//               ID
-//             </Label>
-//             <span id="id" className="col-span-3">
-//               {card?.id}
-//             </span>
-//           </div>
-//           <div className="grid grid-cols-4 items-center gap-4">
-//             <Label htmlFor="code" className="text-right">
-//               Code
-//             </Label>
-//             <span id="id" className="col-span-3">
-//               {card?.code}
-//             </span>
-//           </div>
-//           <div className="grid grid-cols-4 items-center gap-4">
-//             <Label htmlFor="name" className="text-right">
-//               Name
-//             </Label>
-//             <span id="name" className="col-span-3">
-//               {card?.name}
-//             </span>
-//           </div>
-//         </div>
-//       </SheetContent>
-//     </Sheet>
-//   )
-// }
+function DescriptionList(props: { items: { name: string; value: React.ReactNode }[] }) {
+  return (
+    <div>
+      <dl>
+        {props.items.map((item, i) => {
+          return (
+            <div key={i} className="flex items-center gap-x-2 py-2 sm:px-0">
+              <dt className="w-20 flex-none whitespace-break-spaces break-words text-sm font-normal leading-6 text-muted-foreground">
+                {item.name}
+              </dt>
+              <dd
+                className="mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0"
+                data-testid={item.name.replace(/\s/g, "-").toLowerCase()}
+              >
+                {item.value}
+              </dd>
+            </div>
+          )
+        })}
+      </dl>
+    </div>
+  )
+}

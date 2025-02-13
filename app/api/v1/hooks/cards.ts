@@ -14,7 +14,7 @@ export function useCards(args?: { page?: number; perPage?: number; search?: stri
         return yield* client.cards.list({
           urlParams: {
             page: args?.page ?? 1,
-            per_page: args?.perPage ?? 20,
+            per_page: args?.perPage ?? 10,
             ...(args?.search && { search: args.search }),
           },
         })
