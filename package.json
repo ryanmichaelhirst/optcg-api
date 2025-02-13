@@ -111,6 +111,8 @@
     "eslint-plugin-markdown": "^3.0.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "https-proxy-agent": "^7.0.6",
+    "node-fetch": "^3.3.2",
     "npm-run-all": "^4.1.5",
     "playwright": "^1.50.1",
     "postcss": "^8.4.31",

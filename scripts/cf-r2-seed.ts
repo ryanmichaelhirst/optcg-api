@@ -2,6 +2,8 @@ import "@dotenvx/dotenvx/config"
 import { Config, Effect, Redacted } from "effect"
 import { existsSync } from "fs"
 import fs from "fs/promises"
+import { HttpsProxyAgent } from "https-proxy-agent"
+import fetch from "node-fetch"
 import path from "path"
 import { Readable } from "stream"
 import yargs from "yargs"
@@ -35,39 +37,52 @@ const program = Effect.gen(function* () {
     const filename = extraFilename(card.image)
     if (!filename) throw new Error(`Could not extra filename: ${card.image}`)
 
+    const matchingFile = path.join(imgDir, filename)
+    if (existsSync(matchingFile)) {
+      console.log(`✅ Already download ${filename}`)
+      continue
+    }
+
+    console.log(`🔄 Downloading ${filename}`)
     yield* downloadFile(card.image, filename, mode)
-    console.log(`Downloaded ${filename}`)
+    console.log(`✅ Downloaded ${filename}`)
   }
 })
 
 Effect.runPromiseExit(program).then(console.log)
 
 function downloadFile(url: string, filename: string, mode: string) {
+  const destination = path.join(process.cwd(), "tmp/images", filename)
+
   return Effect.gen(function* () {
-    const redactedPw = yield* Config.redacted("PROXY_PASSWORD")
-    const password = Redacted.value(redactedPw)
+    if (mode === "prod") {
+      const redactedPw = yield* Config.redacted("PROXY_PASSWORD")
+      const password = Redacted.value(redactedPw)
 
-    const response = yield* Effect.promise(() => {
-      if (mode === "prod") {
-        const proxyUrl = new URL("https://proxy.scrapeops.io/v1/")
-        proxyUrl.searchParams.append("api_key", password)
-        proxyUrl.searchParams.append("url", url)
+      // Residential Proxy Aggregator
+      const proxyAgent = new HttpsProxyAgent(
+        `http://scrapeops:${password}@residential-proxy.scrapeops.io:8181`,
+      )
+      const targetUrl = url.replace("http://", "https://")
+      const response = yield* Effect.promise(() => fetch(targetUrl, { agent: proxyAgent }))
+      const arrayBuffer = yield* Effect.promise(() => response.arrayBuffer())
+      const buffer = Buffer.from(arrayBuffer)
+      yield* Effect.promise(() => fs.writeFile(destination, buffer))
 
-        return fetch(proxyUrl, {
-          signal: AbortSignal.timeout(120000),
-        })
-      }
-
-      return fetch(url, {
-        signal: AbortSignal.timeout(120000),
-      })
-    })
-    const body = response.body
-    if (!body) throw new Error("Response body is null")
-    // @ts-expect-error ReadableStream<Uint8Array<ArrayBufferLike>> is not equivalent to ReadableStream<any>
-    const stream = Readable.fromWeb(body)
-    const destination = path.join(process.cwd(), "tmp/images", filename)
-    yield* Effect.promise(() => fs.writeFile(destination, stream))
+      // Proxy API Aggregator
+      // const response = yield* Effect.promise(() => {
+      //   const imageUrl = url.replace("http://", "https://")
+      //   const proxyUrl = `https://proxy.scrapeops.io/v1/?api_key=${password}&url=${imageUrl}&residential=true`
+      //   return fetch(proxyUrl)
+      // })
+      // if (!response.ok) throw new Error("Failed proxy request")
+    } else {
+      const response = yield* Effect.promise(() => fetch(url))
+      if (!response.body) throw new Error("Response body is null")
+      // @ts-expect-error ReadableStream<Uint8Array<ArrayBufferLike>> is not equivalent to ReadableStream<any>
+      const stream = Readable.fromWeb(response.body)
+      yield* Effect.promise(() => fs.writeFile(destination, stream))
+    }
   })
 }
 
