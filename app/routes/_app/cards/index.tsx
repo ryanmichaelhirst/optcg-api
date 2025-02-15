@@ -45,7 +45,7 @@ export default function Page() {
     perPage,
     search: search || null,
   })
-
+  console.log("got cards", cardsList)
   const cards = cardsList.data?.data ?? []
   const total = cardsList.data?.total ?? 0
 

@@ -1,9 +1,12 @@
 import type { Card as TCard } from "@prisma/client"
-import { Effect } from "effect"
+import { Config, Effect } from "effect"
 import { Card } from "./Card"
 
 export const serializeCard = (card: TCard) => {
   return Effect.gen(function* () {
+    const CDN_URL = yield* Config.string("CF_CDN_URL")
+    const pngFilename = getFilename(card.image, card.code)
+
     return Card.make({
       id: card.uid,
       code: card.code,
@@ -17,8 +20,13 @@ export const serializeCard = (card: TCard) => {
       color: card.color,
       class: card.class,
       set: card.set,
-      image: card.image,
+      image: `${CDN_URL}/${pngFilename}`,
       effect: card.effect,
     })
   })
+}
+
+function getFilename(url: string, code: string) {
+  const match = url.match(/card\/([^?]+)/)
+  return match ? match[1] : code
 }

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db.server"
 import fs from "fs"
+import differenceWith from "lodash/differenceWith"
 import path from "path"
 import { SeedCardData } from "scripts/scrape-optcg"
 
@@ -10,14 +11,23 @@ export async function seedCards() {
   }
 
   for (const file of files) {
-    const filePath = path.join(process.cwd(), "tmp", file)
+    if (!file.endsWith(".json")) {
+      console.log(`skipping ${file}`)
+      continue
+    }
 
+    const filePath = path.join(process.cwd(), "tmp", file)
     const content = fs.readFileSync(filePath, "utf-8")
     const jsonData: SeedCardData[] = JSON.parse(content)
     console.log(`seeding ${jsonData.length} cards for ${filePath}`)
 
+    // Only insert new cards
+    const dbCards = await db.card.findMany()
+    const filteredCards = differenceWith(jsonData, dbCards, (a, b) => {
+      return a.image === b.image
+    })
     await db.card.createMany({
-      data: jsonData.map((card) => ({
+      data: filteredCards.map((card) => ({
         name: card.cardName,
         cost: Number(card.cost.replace(/cost/gi, "")),
         attribute: card.attribute,

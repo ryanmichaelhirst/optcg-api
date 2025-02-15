@@ -36,7 +36,7 @@ const program = Effect.gen(function* () {
   // Download card images
   const effects = []
   for (const card of cardsJson) {
-    const filename = extraFilename(card.image)
+    const filename = getFilename(card.image)
     if (!filename) throw new Error(`Could not extra filename: ${card.image}`)
 
     const matchingFile = path.join(imgDir, filename)
@@ -103,7 +103,7 @@ function downloadFile(url: string, filename: string, mode: string) {
   })
 }
 
-function extraFilename(url: string) {
+function getFilename(url: string) {
   const match = url.match(/card\/([^?]+)/)
   return match ? match[1] : null
 }
