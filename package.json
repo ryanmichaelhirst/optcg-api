@@ -29,6 +29,7 @@
     "/postgres-data"
   ],
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.749.0",
     "@effect/platform": "^0.75.4",
     "@effect/platform-node": "^0.71.4",
     "@hookform/resolvers": "^4.0.0",

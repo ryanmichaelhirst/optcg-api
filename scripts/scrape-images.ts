@@ -49,7 +49,7 @@ const program = Effect.gen(function* () {
       Effect.gen(function* () {
         console.log(`🔄 Downloading ${filename}`)
         yield* downloadFile(card.image, filename, mode).pipe(
-          Effect.onInterrupt((_fibers) => Console.log("Interrupted", _fibers)),
+          Effect.onInterrupt((_fibers) => Console.log("Interrupted")),
         )
         console.log(`✅ Downloaded ${filename}`)
       }),

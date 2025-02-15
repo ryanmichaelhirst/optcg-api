@@ -2,6 +2,11 @@
 
 Bare bones api for viewing cards in one piece tcg.
 
+## Env Setup
+
+Proxy password is your api key from scrape-ops service.
+CF and S3 vars are from cloudflare r2 service.
+
 ## Web Scraper
 
 Scrape card data with `pnpm tsx scripts/scrape-optcg.ts`.
@@ -27,10 +32,10 @@ View db
 Need to reset and re-seed the Card table?
 `pnpm tsx scripts/cards-seed`
 
-<!-- ## Caching images -->
+## Caching images
 
-<!-- Setup Cloudflare R2: https://developers.cloudflare.com/r2/get-started/
+Setup Cloudflare R2: https://developers.cloudflare.com/r2/get-started/
 
 Run the cloudflare script with `pnpm tsx scripts/cf-r2-seed`
 
-Same rules apply from Web Scraper section. -->
+Same rules apply from Web Scraper section.
