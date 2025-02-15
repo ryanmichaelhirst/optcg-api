@@ -1,5 +1,5 @@
 import "@dotenvx/dotenvx/config"
-import { Config, Effect, Redacted } from "effect"
+import { Config, Console, Effect, Redacted } from "effect"
 import { existsSync } from "fs"
 import fs from "fs/promises"
 import { HttpsProxyAgent } from "https-proxy-agent"
@@ -34,6 +34,7 @@ const program = Effect.gen(function* () {
   const cardsJson: SeedCardData[] = JSON.parse(cardListFile)
 
   // Download card images
+  const effects = []
   for (const card of cardsJson) {
     const filename = extraFilename(card.image)
     if (!filename) throw new Error(`Could not extra filename: ${card.image}`)
@@ -44,10 +45,20 @@ const program = Effect.gen(function* () {
       continue
     }
 
-    console.log(`🔄 Downloading ${filename}`)
-    yield* downloadFile(card.image, filename, mode)
-    console.log(`✅ Downloaded ${filename}`)
+    effects.push(
+      Effect.gen(function* () {
+        console.log(`🔄 Downloading ${filename}`)
+        yield* downloadFile(card.image, filename, mode).pipe(
+          Effect.onInterrupt((_fibers) => Console.log("Interrupted", _fibers)),
+        )
+        console.log(`✅ Downloaded ${filename}`)
+      }),
+    )
   }
+  yield* Effect.all(effects, {
+    // concurrency: 10,
+    concurrency: "unbounded",
+  })
 })
 
 Effect.runPromiseExit(program).then(console.log)
