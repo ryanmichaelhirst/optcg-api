@@ -54,7 +54,6 @@ export default function Page() {
       <div className="my-10">
         <Form {...form}>
           <form
-            // onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8"
             onInput={(e) => {
               const form = e.currentTarget
