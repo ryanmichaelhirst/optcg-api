@@ -1,6 +1,8 @@
 import { useCards } from "@/api/v1/hooks/cards"
 import Container from "@/components/Container"
 import { Pagination } from "@/components/Pagination"
+import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   Form,
   FormControl,
@@ -12,10 +14,21 @@ import {
 } from "@/components/ui/form"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/utils"
 import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
 import { effectTsResolver } from "@hookform/resolvers/effect-ts"
 import { useSearchParams } from "@remix-run/react"
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react"
 import { Schema } from "effect"
 import React from "react"
 import { useForm } from "react-hook-form"
@@ -27,6 +40,8 @@ const formSchema = Schema.Struct({
 type TFormData = Schema.Schema.Type<typeof formSchema>
 
 export default function Page() {
+  const [isOpen, setIsOpen] = React.useState(false)
+
   const form = useForm<TFormData>({
     resolver: effectTsResolver(formSchema),
     defaultValues: {
@@ -63,22 +78,84 @@ export default function Page() {
               debouncedSetSearchParams(searchParams)
             }}
           >
-            <FormField
-              control={form.control}
-              name="search"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Search</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Smoker" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Search by effect, id, name, attribute, class, effect, or set.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-2">
+              <div className="flex space-x-2">
+                <FormField
+                  control={form.control}
+                  name="search"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Search</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Smoker" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Search by effect, id, name, attribute, class, effect, or set.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div>
+                  <Label>Color</Label>
+                  <Select>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Color" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Colors</SelectLabel>
+                        <SelectItem value="red">Red</SelectItem>
+                        <SelectItem value="blue">Blue</SelectItem>
+                        <SelectItem value="black">Black</SelectItem>
+                        <SelectItem value="green">Green</SelectItem>
+                        <SelectItem value="yellow">Yellow</SelectItem>
+                        <SelectItem value="purple">Purple</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    {isOpen ? (
+                      <IconChevronUp className="h-4 w-4" />
+                    ) : (
+                      <IconChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+              <CollapsibleContent className="space-y-2">
+                <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Card set</SelectLabel>
+                      <SelectItem value="red">ST-01</SelectItem>
+                      <SelectItem value="blue">ST-02</SelectItem>
+                      <SelectItem value="black">ST-03</SelectItem>
+                      <SelectItem value="green">ST-04</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Types</SelectLabel>
+                      <SelectItem value="character">Character</SelectItem>
+                      <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="leader">Leader</SelectItem>
+                      <SelectItem value="stage">Stage</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </CollapsibleContent>
+            </Collapsible>
           </form>
         </Form>
       </div>
