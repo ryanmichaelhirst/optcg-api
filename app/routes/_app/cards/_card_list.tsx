@@ -1,4 +1,5 @@
 import { useCards } from "@/api/v1/hooks/cards"
+import { Card } from "@/api/v1/resources/cards/Card"
 import Container from "@/components/Container"
 import { Pagination } from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,14 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import {
   CARD_CLASSES,
   CARD_SETS,
@@ -296,6 +305,13 @@ export default function Page() {
         ))}
       </div>
       <Pagination page={page} perPage={perPage} total={total} />
+      <CardSheet
+        card={cards.find((card) => card.id === cardId)}
+        onOpenChange={(open) => {
+          searchParams.delete(SEARCH_PARAM_KEYS.ID)
+          setSearchParams(searchParams)
+        }}
+      />
     </Container>
   )
 }
@@ -343,5 +359,33 @@ function Filter(props: {
         />
       </div>
     </div>
+  )
+}
+
+function CardSheet(props: { card?: Card; onOpenChange: (open: boolean) => void }) {
+  return (
+    <Sheet open={!!props.card} onOpenChange={props.onOpenChange}>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>{props.card?.name}</SheetTitle>
+        </SheetHeader>
+        <img src={props.card?.image} className="my-2" />
+        <p>{props.card?.effect}</p>
+        <DescriptionList
+          items={[
+            { name: "Code", value: props.card?.code },
+
+            { name: "Attribute", value: props.card?.attribute },
+            { name: "Class", value: props.card?.class },
+            { name: "Set", value: props.card?.set },
+          ]}
+        />
+        <SheetFooter>
+          <SheetClose asChild>
+            <Button>Add to deck</Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
