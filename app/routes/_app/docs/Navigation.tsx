@@ -83,10 +83,7 @@ function NavigationGroup({ group, className }: { group: NavGroup; className?: st
 const navigation: Array<NavGroup> = [
   {
     title: "Guides",
-    links: [
-      { title: "Introduction", href: "/docs" },
-      { title: "Quickstart", href: "/docs/quickstart" },
-    ],
+    links: [{ title: "Quickstart", href: "/docs" }],
   },
   {
     title: "Resources",

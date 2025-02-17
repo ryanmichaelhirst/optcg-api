@@ -14,6 +14,8 @@ export const CARD_TYPES = ["CHARACTER", "EVENT", "LEADER", "STAGE"]
 
 export const RARITIES = ["C", "L", "P", "R", "SEC", "SP CARD", "SR", "TR", "UC"]
 
+export const ATTRIBUTES = ["Ranged", "Slash", "Special", "Strike", "Wisdom"]
+
 export const CARD_SETS = [
   "Tournament Pack Vol.6",
   "Tournament Pack Vol.3",
