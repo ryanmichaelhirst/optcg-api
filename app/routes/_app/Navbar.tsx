@@ -35,7 +35,7 @@ export function Navbar() {
                 <NavigationMenuLink asChild>
                   <a
                     className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                    href="/"
+                    href={route("/")}
                   >
                     <Logo className="h-6 w-6" />
                     <div className="mb-2 mt-4 text-lg font-medium">OPTCG API</div>
@@ -45,10 +45,10 @@ export function Navbar() {
                   </a>
                 </NavigationMenuLink>
               </li>
-              <ListItem href="/" title="Web">
+              <ListItem href={route("/cards")} title="Web">
                 Use the card explorer to start building decks.
               </ListItem>
-              <ListItem href="/" title="API">
+              <ListItem href={route("/docs")} title="API">
                 View the swagger docs to start using the API.
               </ListItem>
             </ul>
