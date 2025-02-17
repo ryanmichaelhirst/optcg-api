@@ -11,6 +11,11 @@ export function useCards(args?: {
   color?: string | null
   set?: string | null
   type?: string | null
+  cost?: string | null
+  class?: string | null
+  counter?: string | null
+  power?: string | null
+  rarity?: string | null
 }) {
   return useQuery({
     queryKey: ["cards", args],
@@ -26,6 +31,11 @@ export function useCards(args?: {
             ...(args?.color && args?.color !== "all" && { color: args.color }),
             ...(args?.set && args?.set !== "all" && { set: args.set }),
             ...(args?.type && args.type !== "all" && { type: args.type }),
+            ...(args?.cost && args.cost !== "all" && { cost: Number(args.cost) }),
+            ...(args?.class && args.class !== "all" && { class: args.class }),
+            ...(args?.counter && args.counter !== "all" && { counter: Number(args.counter) }),
+            ...(args?.power && args.power !== "all" && { power: Number(args.power) }),
+            ...(args?.rarity && args.rarity !== "all" && { rarity: args.rarity }),
           },
         })
       }).pipe(ApiV1Runtime.runPromise),

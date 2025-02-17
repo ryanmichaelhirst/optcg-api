@@ -75,19 +75,18 @@ export function ComboBox(props: ComboBoxProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn(
-            "h-full justify-between whitespace-normal text-left",
-            props.classes?.button ?? "w-[200px]",
-          )}
-          style={{ overflowWrap: "anywhere" }}
+          className={cn("h-9 justify-between text-left", props.classes?.button ?? "w-[200px]")}
+          // style={{ overflowWrap: "anywhere" }}
           disabled={props.disabled}
           data-testid={props.dataTestId ?? "dropdown"}
         >
-          {value
-            ? props.options.find((opt) => opt.value === value)?.label ??
-              props.placeholders?.button ??
-              ""
-            : props.placeholders?.button ?? ""}
+          <span className="w-5/6 truncate">
+            {value
+              ? props.options.find((opt) => opt.value === value)?.label ??
+                props.placeholders?.button ??
+                ""
+              : props.placeholders?.button ?? ""}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -124,7 +123,6 @@ export function ComboBox(props: ComboBoxProps) {
                     className={cn("space-x-3 whitespace-normal", opt.disabled && "opacity-50")}
                     style={{ overflowWrap: "anywhere" }}
                     onSelect={(optionLabel) => {
-                      console.log("onSelect", optionLabel, props.options)
                       const selectedValue = getOptionByLabel(props.options, optionLabel)?.value
                       invariant(selectedValue != null)
                       const newValue = selectedValue === value ? "" : selectedValue

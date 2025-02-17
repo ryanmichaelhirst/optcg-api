@@ -36,6 +36,11 @@ function buildWhere(args: {
   color?: string | null
   set?: string | null
   type?: string | null
+  cost?: number | null
+  class?: string | null
+  counter?: number | null
+  power?: number | null
+  rarity?: string | null
 }) {
   return {
     ...(args.search && {
@@ -51,5 +56,10 @@ function buildWhere(args: {
     ...(args.color && { color: { contains: args.color, mode: "insensitive" as const } }),
     ...(args.set && { set: { contains: args.set, mode: "insensitive" as const } }),
     ...(args.type && { type: { contains: args.type, mode: "insensitive" as const } }),
+    ...(args.cost && { cost: args.cost }),
+    ...(args.class && { class: { contains: args.class, mode: "insensitive" as const } }),
+    ...(args.counter && { counter: args.counter }),
+    ...(args.power && { power: args.power }),
+    ...(args.rarity && { rarity: { contains: args.rarity, mode: "insensitive" as const } }),
   }
 }

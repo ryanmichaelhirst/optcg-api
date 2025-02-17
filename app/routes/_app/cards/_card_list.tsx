@@ -3,7 +3,7 @@ import Container from "@/components/Container"
 import { Pagination } from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { BASE_OPTIONS, ComboBox } from "@/components/ui/combo-box"
+import { BASE_OPTIONS, ComboBox, ComboBoxProps } from "@/components/ui/combo-box"
 import {
   Form,
   FormControl,
@@ -15,12 +15,21 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CARD_SETS, CARD_TYPES, COLORS } from "@/lib/onepiece"
+import {
+  CARD_CLASSES,
+  CARD_SETS,
+  CARD_TYPES,
+  COLORS,
+  COSTS,
+  COUNTERS,
+  POWERS,
+  RARITIES,
+} from "@/lib/onepiece"
 import { cn } from "@/utils"
 import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
 import { effectTsResolver } from "@hookform/resolvers/effect-ts"
 import { useSearchParams } from "@remix-run/react"
-import { IconChevronDown, IconChevronUp } from "@tabler/icons-react"
+import { IconChevronDown, IconChevronUp, IconX } from "@tabler/icons-react"
 import { Schema } from "effect"
 import React from "react"
 import { useForm } from "react-hook-form"
@@ -42,13 +51,18 @@ export default function Page() {
   })
 
   const [searchParams, setSearchParams] = useSearchParams()
-  const page = Number(searchParams.get("page")) || 1
-  const perPage = Number(searchParams.get("per_page")) || 10
-  const search = searchParams.get("search")
-  const cardId = searchParams.get("card_id")
-  const color = searchParams.get("color") ?? ""
-  const cardSet = searchParams.get("card_set") ?? ""
-  const cardType = searchParams.get("card_type") ?? ""
+  const page = Number(searchParams.get(SEARCH_PARAM_KEYS.PAGE)) || 1
+  const perPage = Number(searchParams.get(SEARCH_PARAM_KEYS.PER_PAGE)) || 10
+  const search = searchParams.get(SEARCH_PARAM_KEYS.SEARCH)
+  const cardId = searchParams.get(SEARCH_PARAM_KEYS.ID)
+  const color = searchParams.get(SEARCH_PARAM_KEYS.COLOR) ?? "all"
+  const cardSet = searchParams.get(SEARCH_PARAM_KEYS.SET) ?? "all"
+  const cardType = searchParams.get(SEARCH_PARAM_KEYS.TYPE) ?? "all"
+  const cardCost = searchParams.get(SEARCH_PARAM_KEYS.COST) ?? "all"
+  const cardClass = searchParams.get(SEARCH_PARAM_KEYS.CLASS) ?? "all"
+  const cardCounter = searchParams.get(SEARCH_PARAM_KEYS.COUNTER) ?? "all"
+  const cardPower = searchParams.get(SEARCH_PARAM_KEYS.POWER) ?? "all"
+  const cardRarity = searchParams.get(SEARCH_PARAM_KEYS.RARITY) ?? "all"
   const debouncedSetSearchParams = useDebounceCallback(setSearchParams, 500)
 
   const cardsList = useCards({
@@ -57,6 +71,11 @@ export default function Page() {
     color,
     set: cardSet,
     type: cardType,
+    cost: cardCost,
+    class: cardClass,
+    counter: cardCounter,
+    power: cardPower,
+    rarity: cardRarity,
     search: search || null,
   })
 
@@ -71,7 +90,7 @@ export default function Page() {
             className="space-y-8"
             onInput={(e) => {
               const form = e.currentTarget
-              const search = form.elements.namedItem("search") as HTMLInputElement
+              const search = form.elements.namedItem(SEARCH_PARAM_KEYS.SEARCH) as HTMLInputElement
               searchParams.set(SEARCH_PARAM_KEYS.SEARCH, search.value)
               searchParams.set(SEARCH_PARAM_KEYS.PAGE, String(1))
               debouncedSetSearchParams(searchParams)
@@ -96,36 +115,34 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
-                <div className="space-y-2">
-                  <Label>Color</Label>
-                  <div>
-                    <ComboBox
-                      options={BASE_OPTIONS.concat(
-                        COLORS.map((c) => ({ label: c, value: c.toLowerCase() })),
-                      )}
-                      value={color}
-                      onChange={(value) => {
-                        searchParams.set("color", value)
-                        setSearchParams(searchParams)
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <div>
-                    <ComboBox
-                      options={BASE_OPTIONS.concat(
-                        CARD_TYPES.map((c) => ({ label: c, value: c.toLowerCase() })),
-                      )}
-                      value={cardType}
-                      onChange={(value) => {
-                        searchParams.set("card_type", value)
-                        setSearchParams(searchParams)
-                      }}
-                    />
-                  </div>
-                </div>
+                <Filter
+                  label="Color"
+                  options={BASE_OPTIONS.concat(
+                    COLORS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={color}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.COLOR, value)
+                    setSearchParams(searchParams)
+                  }}
+                  classes={{
+                    button: "w-[120px]",
+                  }}
+                />
+                <Filter
+                  label="Type"
+                  options={BASE_OPTIONS.concat(
+                    CARD_TYPES.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardType}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.TYPE, value)
+                    setSearchParams(searchParams)
+                  }}
+                  classes={{
+                    button: "w-[160px]",
+                  }}
+                />
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" size="sm" className="self-end">
                     {isOpen ? (
@@ -138,23 +155,107 @@ export default function Page() {
                 <Button size="sm" className="w-[120px] self-end">
                   Search
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-x-2 self-end"
+                  onClick={() => {
+                    // searchParams.delete(SEARCH_PARAM_KEYS.SEARCH)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.COLOR)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.TYPE)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.COUNTER)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.COST)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.CLASS)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.POWER)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.RARITY)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.SET)
+                    // searchParams.delete(SEARCH_PARAM_KEYS.ID)
+                    setSearchParams({})
+                  }}
+                >
+                  <IconX className="h-4 w-4" />
+                  Reset
+                </Button>
               </div>
-              <CollapsibleContent className="space-y-2">
-                <div className="space-y-2">
-                  <Label>Card set</Label>
-                  <div>
-                    <ComboBox
-                      options={BASE_OPTIONS.concat(
-                        CARD_SETS.map((c) => ({ label: c, value: c.toLowerCase() })),
-                      )}
-                      value={cardSet}
-                      onChange={(value) => {
-                        searchParams.set("card_set", value)
-                        setSearchParams(searchParams)
-                      }}
-                    />
-                  </div>
-                </div>
+              <CollapsibleContent className="flex flex-wrap gap-2 pt-4">
+                <Filter
+                  label="Cost"
+                  options={BASE_OPTIONS.concat(
+                    COSTS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardCost}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.COST, value)
+                    setSearchParams(searchParams)
+                  }}
+                  classes={{
+                    button: "w-[100px]",
+                  }}
+                />
+                <Filter
+                  label="Power"
+                  options={BASE_OPTIONS.concat(
+                    POWERS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardPower}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.POWER, value)
+                    setSearchParams(searchParams)
+                  }}
+                  classes={{
+                    button: "w-[100px]",
+                  }}
+                />
+                <Filter
+                  label="Counter"
+                  options={BASE_OPTIONS.concat(
+                    COUNTERS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardCounter}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.COUNTER, value)
+                    setSearchParams(searchParams)
+                  }}
+                  classes={{
+                    button: "w-[100px]",
+                  }}
+                />
+                <Filter
+                  label="Class"
+                  options={BASE_OPTIONS.concat(
+                    CARD_CLASSES.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardClass}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.CLASS, value)
+                    setSearchParams(searchParams)
+                  }}
+                />
+                <Filter
+                  label="Card set"
+                  options={BASE_OPTIONS.concat(
+                    CARD_SETS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardSet}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.SET, value)
+                    setSearchParams(searchParams)
+                  }}
+                />
+                <Filter
+                  label="Rarity"
+                  options={BASE_OPTIONS.concat(
+                    RARITIES.map((c) => ({ label: c, value: c.toLowerCase() })),
+                  )}
+                  value={cardRarity}
+                  onChange={(value) => {
+                    searchParams.set(SEARCH_PARAM_KEYS.RARITY, value)
+                    setSearchParams(searchParams)
+                  }}
+                  classes={{
+                    button: "w-[80px]",
+                  }}
+                />
               </CollapsibleContent>
             </Collapsible>
           </form>
@@ -169,7 +270,7 @@ export default function Page() {
                 src={card.image}
                 className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
                 onClick={() => {
-                  searchParams.set(SEARCH_PARAM_KEYS.CARD_ID, card.id)
+                  searchParams.set(SEARCH_PARAM_KEYS.ID, card.id)
                   setSearchParams(searchParams)
                 }}
               />
@@ -219,6 +320,28 @@ function DescriptionList(props: { items: { name: string; value: React.ReactNode 
           )
         })}
       </dl>
+    </div>
+  )
+}
+
+function Filter(props: {
+  label: string
+  value: string
+  options: ComboBoxProps["options"]
+  onChange: ComboBoxProps["onChange"]
+  classes?: ComboBoxProps["classes"]
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{props.label}</Label>
+      <div>
+        <ComboBox
+          options={props.options}
+          value={props.value}
+          onChange={props.onChange}
+          classes={props.classes}
+        />
+      </div>
     </div>
   )
 }

@@ -1,12 +1,16 @@
 export const COLORS = ["Red", "Blue", "Green", "Purple", "Yellow", "Black"]
 
-export const COSTS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+export const COSTS = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(String)
 
-export const POWERS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000]
+export const POWERS = [
+  1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000,
+].map(String)
 
-export const COUNTERS = [1000, 2000]
+export const COUNTERS = [1000, 2000].map(String)
 
 export const CARD_TYPES = ["CHARACTER", "EVENT", "LEADER", "STAGE"]
+
+export const RARITIES = ["C", "L", "P", "R", "SEC", "SP CARD", "SR", "TR", "UC"]
 
 export const CARD_SETS = [
   "Tournament Pack Vol.6",
@@ -121,7 +125,6 @@ export const CARD_CLASSES = [
   "Animal Kingdom Pirates/Former CP9",
   "Animal Kingdom Pirates/Hawkins Pirates",
   "Animal Kingdom Pirates/On-Air Pirates",
-  "Animal Kingdom Pirates/SMILE",
   "Animal Kingdom Pirates/Smile",
   "Animal/Alabasta",
   "Animal/Alabasta/Straw Hat Crew",
