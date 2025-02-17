@@ -13,6 +13,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import { SITE_NAME } from "@/lib/onepiece"
 import { cn } from "@/utils"
 import { route } from "routes-gen"
 
@@ -38,7 +39,7 @@ export function Navbar() {
                     href={route("/")}
                   >
                     <Logo className="h-6 w-6" />
-                    <div className="mb-2 mt-4 text-lg font-medium">OPTCG API</div>
+                    <div className="mb-2 mt-4 text-lg font-medium">{SITE_NAME}</div>
                     <p className="text-sm leading-tight text-muted-foreground">
                       One Piece trading cards from the web or api, completely open source.
                     </p>
