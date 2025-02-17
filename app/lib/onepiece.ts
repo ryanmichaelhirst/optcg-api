@@ -1,3 +1,5 @@
+export const SITE_NAME = "OPTCG API"
+
 export const COLORS = ["Red", "Blue", "Green", "Purple", "Yellow", "Black"]
 
 export const COSTS = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(String)

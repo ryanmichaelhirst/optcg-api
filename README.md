@@ -39,3 +39,14 @@ Setup Cloudflare R2: https://developers.cloudflare.com/r2/get-started/
 Run the cloudflare script with `pnpm tsx scripts/cf-r2-seed`
 
 Same rules apply from Web Scraper section.
+
+## Logo Generation
+
+Generated with the following Dalle-3 prompt:
+
+create a logo designed in a modern, swan minimalist symmetrical style.
+The logo is a black vector graphic set against a clean, white background.
+The symmetry of the design adds a sense of balance and harmony, while the use
+of black and white creates a stark contrast, making the logo stand out.
+The modern style of the logo suggests a forward-thinking, innovative approach.
+Overall, this logo effectively combines simplicity and sophistication in its design.

@@ -1,10 +1,11 @@
 import landingBg from "@/assets/landing_bg.png"
 import { ButtonLink } from "@/components/ButtonLink"
 import { Button } from "@/components/ui/button"
+import { SITE_NAME } from "@/lib/onepiece"
 import { type MetaFunction } from "@remix-run/node"
 import { route } from "routes-gen"
 
-export const meta: MetaFunction = () => [{ title: "OPTCG Api | Home" }]
+export const meta: MetaFunction = () => [{ title: `${SITE_NAME} | Home` }]
 
 export default function Page() {
   return (
@@ -16,8 +17,8 @@ export default function Page() {
         <div className="absolute inset-0 bg-gray-900 bg-opacity-60 dark:bg-black dark:bg-opacity-70"></div>
       </div>
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center">
-        <p className="mb-10 text-4xl font-bold text-white">OPTCG Api</p>
+      <div className="relative flex h-full flex-col items-center justify-center">
+        <p className="mb-10 text-4xl font-bold text-white">{SITE_NAME}</p>
         <div className="flex max-w-xl flex-col items-center">
           <p className="mb-4 text-xl text-white">
             Access all One Piece trading cards from the web or api. Open source. Perfect for deck
