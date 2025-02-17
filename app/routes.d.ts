@@ -4,7 +4,6 @@ declare module "routes-gen" {
     "/cards": Record<string, never>;
     "/docs": Record<string, never>;
     "/docs/cards": Record<string, never>;
-    "/docs/quickstart": Record<string, never>;
     "/health-check": Record<string, never>;
     "/preferences/theme": Record<string, never>;
     "/swagger": Record<string, never>;
@@ -16,7 +15,6 @@ declare module "routes-gen" {
       | ["/cards"]
       | ["/docs"]
       | ["/docs/cards"]
-      | ["/docs/quickstart"]
       | ["/health-check"]
       | ["/preferences/theme"]
       | ["/swagger"]
