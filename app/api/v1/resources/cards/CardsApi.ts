@@ -11,6 +11,9 @@ export class CardsApi extends HttpApiGroup.make("cards")
         Schema.Struct({
           ...PaginationQuery.fields,
           search: Schema.optional(Schema.String),
+          color: Schema.optional(Schema.String),
+          set: Schema.optional(Schema.String),
+          type: Schema.optional(Schema.String),
         }),
       )
       .addSuccess(buildPaginationResult(Card)),

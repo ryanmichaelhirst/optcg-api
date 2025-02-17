@@ -3,10 +3,10 @@ import Container from "@/components/Container"
 import { Pagination } from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { BASE_OPTIONS, ComboBox } from "@/components/ui/combo-box"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,15 +15,7 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { CARD_SETS, CARD_TYPES, COLORS } from "@/lib/onepiece"
 import { cn } from "@/utils"
 import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
 import { effectTsResolver } from "@hookform/resolvers/effect-ts"
@@ -48,19 +40,26 @@ export default function Page() {
       search: "",
     },
   })
+
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get("page")) || 1
   const perPage = Number(searchParams.get("per_page")) || 10
   const search = searchParams.get("search")
   const cardId = searchParams.get("card_id")
+  const color = searchParams.get("color") ?? ""
+  const cardSet = searchParams.get("card_set") ?? ""
+  const cardType = searchParams.get("card_type") ?? ""
   const debouncedSetSearchParams = useDebounceCallback(setSearchParams, 500)
 
   const cardsList = useCards({
     page,
     perPage,
+    color,
+    set: cardSet,
+    type: cardType,
     search: search || null,
   })
-  console.log("got cards", cardsList)
+
   const cards = cardsList.data?.data ?? []
   const total = cardsList.data?.total ?? 0
 
@@ -87,36 +86,48 @@ export default function Page() {
                     <FormItem>
                       <FormLabel>Search</FormLabel>
                       <FormControl>
-                        <Input placeholder="Smoker" {...field} />
+                        <Input
+                          {...field}
+                          placeholder="Search name, code, effect, etc."
+                          className="w-[300px]"
+                        />
                       </FormControl>
-                      <FormDescription>
-                        Search by effect, id, name, attribute, class, effect, or set.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div>
+                <div className="space-y-2">
                   <Label>Color</Label>
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Color" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Colors</SelectLabel>
-                        <SelectItem value="red">Red</SelectItem>
-                        <SelectItem value="blue">Blue</SelectItem>
-                        <SelectItem value="black">Black</SelectItem>
-                        <SelectItem value="green">Green</SelectItem>
-                        <SelectItem value="yellow">Yellow</SelectItem>
-                        <SelectItem value="purple">Purple</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <ComboBox
+                      options={BASE_OPTIONS.concat(
+                        COLORS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                      )}
+                      value={color}
+                      onChange={(value) => {
+                        searchParams.set("color", value)
+                        setSearchParams(searchParams)
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <div>
+                    <ComboBox
+                      options={BASE_OPTIONS.concat(
+                        CARD_TYPES.map((c) => ({ label: c, value: c.toLowerCase() })),
+                      )}
+                      value={cardType}
+                      onChange={(value) => {
+                        searchParams.set("card_type", value)
+                        setSearchParams(searchParams)
+                      }}
+                    />
+                  </div>
                 </div>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="outline" size="sm" className="self-end">
                     {isOpen ? (
                       <IconChevronUp className="h-4 w-4" />
                     ) : (
@@ -124,36 +135,26 @@ export default function Page() {
                     )}
                   </Button>
                 </CollapsibleTrigger>
+                <Button size="sm" className="w-[120px] self-end">
+                  Search
+                </Button>
               </div>
               <CollapsibleContent className="space-y-2">
-                <Select>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Card set</SelectLabel>
-                      <SelectItem value="red">ST-01</SelectItem>
-                      <SelectItem value="blue">ST-02</SelectItem>
-                      <SelectItem value="black">ST-03</SelectItem>
-                      <SelectItem value="green">ST-04</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Select>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Types</SelectLabel>
-                      <SelectItem value="character">Character</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="leader">Leader</SelectItem>
-                      <SelectItem value="stage">Stage</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label>Card set</Label>
+                  <div>
+                    <ComboBox
+                      options={BASE_OPTIONS.concat(
+                        CARD_SETS.map((c) => ({ label: c, value: c.toLowerCase() })),
+                      )}
+                      value={cardSet}
+                      onChange={(value) => {
+                        searchParams.set("card_set", value)
+                        setSearchParams(searchParams)
+                      }}
+                    />
+                  </div>
+                </div>
               </CollapsibleContent>
             </Collapsible>
           </form>

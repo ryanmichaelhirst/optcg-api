@@ -24,6 +24,8 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   deletedAt DateTime?
+
+  @@map("users")
 }
 
 // Stripe payment record
@@ -39,6 +41,8 @@ model Payment {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
+
+  @@map("payments")
 }
 
 // One Piece TCG
@@ -58,4 +62,6 @@ model Card {
   effect    String? // "All of your {Land of Wano} type Character cards without a Counter..."
   set       String // "-Memorial Collection-[EB-01]"
   image     String // "https://en.onepiece-cardgame.com/images/cardlist/card/EB01-001.png?241220"
+
+  @@map("cards")
 }

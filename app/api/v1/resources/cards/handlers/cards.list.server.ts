@@ -6,21 +6,7 @@ import { serializeCard } from "../serializeCard"
 
 export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", (args) =>
   Effect.gen(function* () {
-    const { search } = args.urlParams
-
-    const where = search
-      ? {
-          OR: [
-            { code: { contains: search, mode: "insensitive" as const } }, // EB01-001
-            { name: { contains: search, mode: "insensitive" as const } }, // "Kozuki Oden"
-            { attribute: { contains: search, mode: "insensitive" as const } }, // "Slash"
-            { class: { contains: search, mode: "insensitive" as const } }, // "Land of Wano/Kouzuki Clan"
-            { effect: { contains: search, mode: "insensitive" as const } }, // "All of your {Land of Wano} type Character cards without a Counter..."
-            { set: { contains: search, mode: "insensitive" as const } }, // "-Memorial Collection-[EB-01]"
-          ],
-        }
-      : {}
-
+    const where = buildWhere(args.urlParams)
     const cards = yield* Effect.promise(() =>
       db.card.findMany({
         where,
@@ -42,3 +28,28 @@ export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", (args) =
     }
   }),
 )
+
+function buildWhere(args: {
+  page?: number
+  per_page?: number
+  search?: string | null
+  color?: string | null
+  set?: string | null
+  type?: string | null
+}) {
+  return {
+    ...(args.search && {
+      OR: [
+        { code: { contains: args.search, mode: "insensitive" as const } }, // EB01-001
+        { name: { contains: args.search, mode: "insensitive" as const } }, // "Kozuki Oden"
+        { attribute: { contains: args.search, mode: "insensitive" as const } }, // "Slash"
+        { class: { contains: args.search, mode: "insensitive" as const } }, // "Land of Wano/Kouzuki Clan"
+        { effect: { contains: args.search, mode: "insensitive" as const } }, // "All of your {Land of Wano} type Character cards without a Counter..."
+        { set: { contains: args.search, mode: "insensitive" as const } }, // "-Memorial Collection-[EB-01]"
+      ],
+    }),
+    ...(args.color && { color: { contains: args.color, mode: "insensitive" as const } }),
+    ...(args.set && { set: { contains: args.set, mode: "insensitive" as const } }),
+    ...(args.type && { type: { contains: args.type, mode: "insensitive" as const } }),
+  }
+}
