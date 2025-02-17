@@ -19,6 +19,6 @@ export const cardsFindById = HttpApiBuilder.handler(ApiV1, "cards", "findById", 
       return yield* new NotFound()
     }
 
-    return yield* serializeCard(card)
+    return yield* serializeCard(card).pipe(Effect.die)
   }),
 )

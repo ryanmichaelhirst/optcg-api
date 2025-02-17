@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { MoonIcon, SunIcon } from "lucide-react"
+import { IconMoon, IconSun } from "@tabler/icons-react"
 import { useTypedFetcher } from "remix-typedjson"
 import { route } from "routes-gen"
 
@@ -30,9 +30,9 @@ export function ThemeToggle(props: { theme: any }) {
         }}
       >
         {theme === "dark" ? (
-          <MoonIcon className="h-6 w-6 text-gray-800 dark:text-gray-300" />
+          <IconMoon className="h-6 w-6 text-gray-800 dark:text-gray-300" />
         ) : (
-          <SunIcon className="h-6 w-6 text-yellow-400 dark:text-yellow-400" />
+          <IconSun className="h-6 w-6 text-yellow-400 dark:text-yellow-400" />
         )}
       </Button>
     </div>

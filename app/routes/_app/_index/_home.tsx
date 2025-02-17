@@ -2,13 +2,11 @@ import landingBg from "@/assets/landing_bg.png"
 import { ButtonLink } from "@/components/ButtonLink"
 import { Button } from "@/components/ui/button"
 import { type MetaFunction } from "@remix-run/node"
-import { useNavigate } from "@remix-run/react"
 import { route } from "routes-gen"
+
 export const meta: MetaFunction = () => [{ title: "OPTCG Api | Home" }]
 
 export default function Page() {
-  const navigate = useNavigate()
-
   return (
     <main className="relative h-screen w-full">
       <div
@@ -26,14 +24,22 @@ export default function Page() {
             building and personal projects.
           </p>
           <div className="flex items-center justify-center gap-x-4">
-            <ButtonLink to={route("/docs")} variant="outline">
-              Get started
+            <ButtonLink to={route("/cards")} variant="outline">
+              WEB
             </ButtonLink>
-
+            <ButtonLink to={route("/docs")} variant="default">
+              API
+            </ButtonLink>
+          </div>
+          <div className="mt-10">
             <Button
               onClick={() => window.open("https://github.com/ryanmichaelhirst/optcg-api", "_blank")}
+              variant="link"
             >
               Github
+            </Button>
+            <Button onClick={() => window.open("/swagger", "_blank")} variant="link">
+              Swagger
             </Button>
           </div>
         </div>

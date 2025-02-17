@@ -1,6 +1,6 @@
 import { type DialogProps } from "@radix-ui/react-dialog"
+import { IconSearch } from "@tabler/icons-react"
 import { Command as CommandPrimitive } from "cmdk"
-import { Search } from "lucide-react"
 import * as React from "react"
 
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -38,11 +38,13 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
 
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
+    keyboardShortcut?: boolean
+  }
+>(({ className, keyboardShortcut, ...props }, ref) => {
   return (
     <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <IconSearch className="mr-2 h-4 w-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         ref={ref}
         className={cn(
@@ -52,11 +54,13 @@ const CommandInput = React.forwardRef<
         {...props}
       />
       {/* Not a part of shadcn/ui. Added to communicate keyboard search shortcut */}
-      <div className="flex cursor-help items-center space-x-1" title="Press 'Enter' to search">
-        <KeyboardShortcut>
-          <kbd className="h-4 w-4">↵</kbd>
-        </KeyboardShortcut>
-      </div>
+      {keyboardShortcut && (
+        <div className="flex cursor-help items-center space-x-1" title="Press 'Enter' to search">
+          <KeyboardShortcut>
+            <kbd className="h-4 w-4">↵</kbd>
+          </KeyboardShortcut>
+        </div>
+      )}
     </div>
   )
 })
@@ -149,4 +153,8 @@ export {
   CommandList,
   CommandSeparator,
   CommandShortcut,
+}
+
+export function getOptionByLabel(options: { label: string; value: string }[], label: string) {
+  return options.find((opt) => opt.label.toLowerCase().trim() === label.toLowerCase().trim())
 }

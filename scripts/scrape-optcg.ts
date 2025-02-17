@@ -2,6 +2,7 @@ import "@dotenvx/dotenvx/config"
 import * as cheerio from "cheerio"
 import { Config, Effect, Redacted } from "effect"
 import fs from "fs"
+import uniqWith from "lodash/uniqWith"
 import path from "path"
 import { chromium } from "playwright"
 import yargs from "yargs"
@@ -67,7 +68,11 @@ const program = Effect.gen(function* () {
   console.log(`SEARCH for ${color} cards`)
 
   // Ensure at least one card element is attached to the DOM
-  yield* Effect.promise(() => page.waitForSelector("div.resultCol"))
+  yield* Effect.promise(() =>
+    page.waitForSelector("div.resultCol", {
+      timeout: 1000000,
+    }),
+  )
   console.log(`Scraping cards for color ${color}`)
 
   // Get all hidden <dl> elements containing the card data
@@ -92,7 +97,12 @@ const program = Effect.gen(function* () {
     fs.mkdirSync(tmpDir, { recursive: true })
   }
   const filePath = path.join(tmpDir, `${color}_cardlist.json`)
-  fs.writeFileSync(filePath, JSON.stringify(colorCardData, null, 2), "utf-8")
+  // Ensure we only have unique cards
+  const uniqCards = uniqWith(colorCardData, (a, b) => {
+    return a.infoCol[0] === b.infoCol[0] && a.image === b.image
+  })
+  console.log(`Unique cards found: ${uniqCards.length}`)
+  fs.writeFileSync(filePath, JSON.stringify(uniqCards, null, 2), "utf-8")
   console.log(`Saved file ${filePath}`)
 
   yield* Effect.promise(() => browser.close())
