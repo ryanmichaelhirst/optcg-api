@@ -38,6 +38,9 @@ export default function Page() {
             >
               Github
             </Button>
+            <Button onClick={() => window.open("/swagger", "_blank")} variant="link">
+              Swagger
+            </Button>
           </div>
         </div>
       </div>
