@@ -16,7 +16,7 @@ export default function Page() {
         <div className="absolute inset-0 bg-gray-900 bg-opacity-60 dark:bg-black dark:bg-opacity-70"></div>
       </div>
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center">
+      <div className="relative flex h-full flex-col items-center justify-center">
         <p className="mb-10 text-4xl font-bold text-white">OPTCG Api</p>
         <div className="flex max-w-xl flex-col items-center">
           <p className="mb-4 text-xl text-white">
