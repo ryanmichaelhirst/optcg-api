@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, ChevronsUpDown } from "lucide-react"
+import { IconCheck, IconSelector } from "@tabler/icons-react"
 import React, { useState } from "react"
 import invariant from "tiny-invariant"
 
@@ -87,7 +87,7 @@ export function ComboBox(props: ComboBoxProps) {
                 ""
               : props.placeholders?.button ?? ""}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <IconSelector className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -132,7 +132,7 @@ export function ComboBox(props: ComboBoxProps) {
                       props.onChange?.(newValue)
                     }}
                   >
-                    <Check
+                    <IconCheck
                       className={cn("h-4 w-4", value === opt.value ? "opacity-100" : "opacity-0")}
                     />
                     {opt.icon ? opt.icon() : null}

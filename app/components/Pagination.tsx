@@ -1,8 +1,7 @@
 import { useSearchParams } from "@remix-run/react"
 
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
-
 import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
+import { IconChevronLeftPipe, IconChevronRight, IconChevronRightPipe } from "@tabler/icons-react"
 
 import { Button } from "./ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
@@ -76,7 +75,7 @@ export function Pagination(props: {
             }
           }}
         >
-          <ChevronFirst className="h-5 w-5" />
+          <IconChevronLeftPipe className="h-5 w-5" />
         </Button>
         <Button
           variant={"link"}
@@ -96,7 +95,7 @@ export function Pagination(props: {
             }
           }}
         >
-          <ChevronLeft className="h-5 w-5" />
+          <IconChevronLeftPipe className="h-5 w-5" />
         </Button>
         <Button
           variant={"link"}
@@ -113,7 +112,7 @@ export function Pagination(props: {
             }
           }}
         >
-          <ChevronRight className="h-5 w-5" />
+          <IconChevronRight className="h-5 w-5" />
         </Button>
         <Button
           variant={"link"}
@@ -130,7 +129,7 @@ export function Pagination(props: {
             }
           }}
         >
-          <ChevronLast className="h-5 w-5" />
+          <IconChevronRightPipe className="h-5 w-5" />
         </Button>
       </div>
     </div>
