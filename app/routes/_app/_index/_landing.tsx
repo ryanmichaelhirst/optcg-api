@@ -1,11 +1,10 @@
 import landingBg from "@/assets/landing_bg.png"
 import { ButtonLink } from "@/components/ButtonLink"
-import { Button } from "@/components/ui/button"
 import { SITE_NAME } from "@/lib/onepiece"
 import { type MetaFunction } from "@remix-run/node"
 import { route } from "routes-gen"
 
-export const meta: MetaFunction = () => [{ title: `${SITE_NAME} | Home` }]
+export const meta: MetaFunction = () => [{ title: `${SITE_NAME} | TCG Player Tools` }]
 
 export default function Page() {
   return (
@@ -25,23 +24,12 @@ export default function Page() {
             building and personal projects.
           </p>
           <div className="flex items-center justify-center gap-x-4">
-            <ButtonLink to={route("/cards")} variant="outline">
-              WEB
+            <ButtonLink to={route("/cards")} variant="default">
+              Cards
             </ButtonLink>
-            <ButtonLink to={route("/docs")} variant="default">
+            <ButtonLink to={route("/docs")} variant="outline">
               API
             </ButtonLink>
-          </div>
-          <div className="mt-10">
-            <Button
-              onClick={() => window.open("https://github.com/ryanmichaelhirst/optcg-api", "_blank")}
-              variant="link"
-            >
-              Github
-            </Button>
-            <Button onClick={() => window.open("/swagger", "_blank")} variant="link">
-              Swagger
-            </Button>
           </div>
         </div>
       </div>
