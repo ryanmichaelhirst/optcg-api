@@ -55,8 +55,12 @@ Overall, this logo effectively combines simplicity and sophistication in its des
 
 I want you to create a competitive one piece deck. I have attached the game rules "optcg_rules.pdf" and complete card list "Complete_cardlist.json".
 
-Below is a card list for one of the best decks in the current meta. You can find info for each card by matching the string from this list with the "code" attribute from "Complete_cardlist.json"
+https://www.dropbox.com/scl/fi/g1v709jc5xc4kmx0qr1ho/Complete_cardlist.json?rlkey=bwmir0fe8o9p01qvpnd0l1l41&st=pjyzwo8p&dl=0
+
+https://www.dropbox.com/scl/fi/p20vn5xhklxzbljxareqp/optcg_rules.pdf?rlkey=h2qza9hxr9o5jwe182pm1aci4&st=3hndn1p3&dl=0
+
+Below is a card list for one of the best decks. This deck uses blue leader Donquixote Doflamingo (OP01-060) to flood the board with characters fast. Analyze each card in this deck by matching each array item with the "code" attribute from "Complete_cardlist.json". You need to understand what the deck does so you can create a deck that beats it.
 
 ["OP01-060","ST03-005","ST03-005","ST03-005","ST03-005","ST03-004","ST03-004","ST03-004","OP01-077","OP01-077","OP01-077","OP01-077","OP03-044","OP06-047","OP06-047","OP06-047","EB01-023","EB01-023","EB01-023","EB01-023","OP07-040","OP07-040","OP07-040","OP07-040","OP07-045","OP07-045","OP07-045","OP07-045","OP07-046","OP07-046","OP07-046","OP07-046","ST17-002","ST17-002","ST17-002","ST17-002","ST17-003","ST17-003","ST17-004","ST17-004","ST17-004","ST17-004","ST17-005","ST17-005","ST17-005","ST17-005","OP02-068","OP06-058","OP06-058","OP07-057","OP07-057"]
 
-The deck must adhere to rules listed in "optcg_rules.pdf", and beat the meta deck listed above. For the deck you create, provide the complete deck list, the deck's strategy, and key combos.
+The deck you create must adhere to rules listed in "optcg_rules.pdf", and beat the meta deck. Provide the card code list, main strategy, and key combos.

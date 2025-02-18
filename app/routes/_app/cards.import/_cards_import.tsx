@@ -37,7 +37,7 @@ export default function Page() {
           {codes.map((code, idx) => {
             const card = cards.find((card) => card.code === code)
             if (!card) {
-              return <p key={idx}>Error finding card</p>
+              return <p key={idx}>Loading...</p>
             }
 
             return <CardPreview key={idx} card={card} />
@@ -102,4 +102,57 @@ const list = [
   "OP06-058",
   "OP07-057",
   "OP07-057",
+]
+
+// ChatGPT deck list
+const aiList = [
+  "OP01-016",
+  "OP01-016",
+  "OP01-016",
+  "OP01-016",
+  "OP01-016",
+  "OP01-016",
+  "OP01-016",
+  "OP01-016",
+  "OP01-017",
+  "OP01-017",
+  "OP01-017",
+  "OP01-024",
+  "OP01-024",
+  "OP01-024",
+  "OP01-024",
+  "OP01-025",
+  "OP01-025",
+  "OP01-025",
+  "OP01-025",
+  "OP01-026",
+  "OP01-029",
+  "OP01-029",
+  "OP01-029",
+  "OP01-029",
+  "OP01-120",
+  "OP01-120",
+  "OP01-120",
+  "OP01-120",
+  "OP01-120",
+  "OP01-120",
+  "OP02-004",
+  "OP02-004",
+  "OP02-004",
+  "OP02-004",
+  "OP02-004",
+  "OP02-005",
+  "OP02-011",
+  "OP02-013",
+  "OP02-013",
+  "OP02-013",
+  "OP02-013",
+  "OP02-013",
+  "OP02-018",
+  "OP02-018",
+  "OP02-018",
+  "OP02-018",
+  "OP02-018",
+  "OP02-018",
+  "OP02-018",
 ]
