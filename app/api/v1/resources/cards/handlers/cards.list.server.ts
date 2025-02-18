@@ -7,12 +7,21 @@ import { serializeCard } from "../serializeCard"
 export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", (args) =>
   Effect.gen(function* () {
     const where = buildWhere(args.urlParams)
+    const orderBy = args.urlParams.order_by as any
+    const orderDir = args.urlParams.order_dir as any
+
     const cards = yield* Effect.promise(() =>
       db.card.findMany({
         where,
         take: args.urlParams.per_page,
         skip: (args.urlParams.page - 1) * args.urlParams.per_page,
-        orderBy: { code: "asc" },
+        orderBy: {
+          ...(orderBy && orderDir
+            ? {
+                [orderBy]: orderDir,
+              }
+            : { code: "asc" }),
+        },
       }),
     )
 
@@ -41,6 +50,7 @@ function buildWhere(args: {
   counter?: number | null
   power?: number | null
   rarity?: string | null
+  card_ids?: readonly string[] | null
 }) {
   return {
     ...(args.search && {
@@ -61,5 +71,6 @@ function buildWhere(args: {
     ...(args.counter && { counter: args.counter }),
     ...(args.power && { power: args.power }),
     ...(args.rarity && { rarity: { contains: args.rarity, mode: "insensitive" as const } }),
+    ...(args.card_ids && { code: { in: Array.from(args.card_ids) } }),
   }
 }

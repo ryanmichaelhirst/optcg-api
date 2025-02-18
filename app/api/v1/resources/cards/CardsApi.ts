@@ -19,6 +19,9 @@ export class CardsApi extends HttpApiGroup.make("cards")
           counter: Schema.optional(Schema.NumberFromString),
           power: Schema.optional(Schema.NumberFromString),
           rarity: Schema.optional(Schema.String),
+          card_ids: Schema.optional(Schema.Array(Schema.String)),
+          order_by: Schema.optional(Schema.String),
+          order_dir: Schema.optional(Schema.String),
         }),
       )
       .addSuccess(buildPaginationResult(Card)),

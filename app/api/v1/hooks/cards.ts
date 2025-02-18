@@ -16,6 +16,7 @@ export function useCards(args?: {
   counter?: string | null
   power?: string | null
   rarity?: string | null
+  cardIds?: string[] | null
 }) {
   return useQuery({
     queryKey: ["cards", args],
@@ -36,6 +37,7 @@ export function useCards(args?: {
             ...(args?.counter && args.counter !== "all" && { counter: Number(args.counter) }),
             ...(args?.power && args.power !== "all" && { power: Number(args.power) }),
             ...(args?.rarity && args.rarity !== "all" && { rarity: args.rarity }),
+            ...(args?.cardIds && { card_ids: args.cardIds }),
           },
         })
       }).pipe(ApiV1Runtime.runPromise),

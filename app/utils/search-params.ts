@@ -11,4 +11,6 @@ export const SEARCH_PARAM_KEYS = {
   COUNTER: "counter", // used for card counter, e.g. counter=1000
   POWER: "power", // used for card power, e.g. power=5000
   RARITY: "rarity", // used for card rarity, e.g. rarity=common
+  ORDER_BY: "order_by", // used for sorting, e.g. order_by=cost
+  ORDER_DIR: "order_dir", // used for sorting, e.g. order_dir=asc
 }

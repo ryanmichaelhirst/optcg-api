@@ -56,11 +56,17 @@ export function Navbar() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink asChild>
-            <ButtonLink to={route("/cards")} className="hover:no-underline" variant="ghost">
-              Cards
-            </ButtonLink>
-          </NavigationMenuLink>
+          <NavigationMenuTrigger className="bg-transparent">Cards</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+              <ListItem href={route("/cards")} title="Directory">
+                Easily view all cards
+              </ListItem>
+              <ListItem href={route("/cards/import")} title="Builder">
+                Import a list of cards to build a deck
+              </ListItem>
+            </ul>
+          </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink asChild>

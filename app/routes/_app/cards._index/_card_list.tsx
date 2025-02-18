@@ -1,6 +1,8 @@
 import { useCards } from "@/api/v1/hooks/cards"
 import { Card } from "@/api/v1/resources/cards/Card"
+import { CardPreview } from "@/components/CardPreview"
 import Container from "@/components/Container"
+import { DescriptionList } from "@/components/DescriptionList"
 import { Pagination } from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -13,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -34,7 +35,6 @@ import {
   POWERS,
   RARITIES,
 } from "@/lib/onepiece"
-import { cn } from "@/utils"
 import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
 import { effectTsResolver } from "@hookform/resolvers/effect-ts"
 import { useSearchParams } from "@remix-run/react"
@@ -272,36 +272,7 @@ export default function Page() {
       </div>
       <div className="mb-4 grid grid-cols-5 gap-4">
         {cards.map((card) => (
-          <HoverCard key={card.id}>
-            <HoverCardTrigger asChild>
-              <img
-                key={card.id}
-                src={card.image}
-                className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
-                onClick={() => {
-                  searchParams.set(SEARCH_PARAM_KEYS.ID, card.id)
-                  setSearchParams(searchParams)
-                }}
-              />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="flex justify-between space-x-4">
-                <div className="space-y-1">
-                  <h4 className="text-sm font-semibold">{card?.name}</h4>
-                  <p className="text-sm">{card?.effect ?? "No effect"}</p>
-                  <DescriptionList
-                    items={[
-                      { name: "Code", value: card.code },
-
-                      { name: "Attribute", value: card.attribute },
-                      { name: "Class", value: card.class },
-                      { name: "Set", value: card.set },
-                    ]}
-                  />
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
+          <CardPreview key={card.id} card={card} cardId={cardId} />
         ))}
       </div>
       <Pagination page={page} perPage={perPage} total={total} />
@@ -313,30 +284,6 @@ export default function Page() {
         }}
       />
     </Container>
-  )
-}
-
-function DescriptionList(props: { items: { name: string; value: React.ReactNode }[] }) {
-  return (
-    <div>
-      <dl>
-        {props.items.map((item, i) => {
-          return (
-            <div key={i} className="flex items-center gap-x-2 py-2 sm:px-0">
-              <dt className="w-20 flex-none whitespace-break-spaces break-words text-sm font-normal leading-6 text-muted-foreground">
-                {item.name}
-              </dt>
-              <dd
-                className="mt-1 text-sm leading-6 sm:col-span-2 sm:mt-0"
-                data-testid={item.name.replace(/\s/g, "-").toLowerCase()}
-              >
-                {item.value}
-              </dd>
-            </div>
-          )
-        })}
-      </dl>
-    </div>
   )
 }
 

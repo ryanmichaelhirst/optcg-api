@@ -2,6 +2,7 @@ declare module "routes-gen" {
   export type RouteParams = {
     "/": Record<string, never>;
     "/cards": Record<string, never>;
+    "/cards/import": Record<string, never>;
     "/docs": Record<string, never>;
     "/docs/cards": Record<string, never>;
     "/health-check": Record<string, never>;
@@ -13,6 +14,7 @@ declare module "routes-gen" {
     T extends
       | ["/"]
       | ["/cards"]
+      | ["/cards/import"]
       | ["/docs"]
       | ["/docs/cards"]
       | ["/health-check"]
