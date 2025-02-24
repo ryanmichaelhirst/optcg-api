@@ -1,158 +1,85 @@
 import { useCards } from "@/api/v1/hooks/cards"
-import { CardPreview } from "@/components/CardPreview"
+import { Card } from "@/api/v1/resources/cards/Card"
 import Container from "@/components/Container"
 import { Button } from "@/components/ui/button"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Textarea } from "@/components/ui/text-area"
 import React from "react"
+import { DECKS } from "./deck-lists"
+type CardWithCount = Card & { count: number }
 
+import { DescriptionList } from "@/components/DescriptionList"
 export default function Page() {
   const [codes, setCodes] = React.useState<string[]>([])
   const cardsList = useCards({
     cardIds: codes,
-    perPage: 51,
+    perPage: 100,
   })
-  const cards = cardsList.data?.data ?? []
+
+  const onImport = () => {
+    const codes = (document.querySelector("textarea[name=card_list]") as HTMLTextAreaElement)?.value
+    setCodes(codes.trim().split(","))
+  }
+
+  const cardsWithCount = codes.sort().reduce<CardWithCount[]>((acc, cur) => {
+    const arrIdx = acc.findIndex((card) => card.code === cur)
+    const card = cardsList.data?.data.find((card) => card.code === cur)
+    if (!card) return acc
+
+    if (arrIdx === -1) {
+      acc.push({ ...card, count: 1 })
+    } else {
+      acc[arrIdx].count += 1
+    }
+
+    return acc
+  }, [])
 
   return (
     <Container>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          const form = e.currentTarget
-          const cardList = form.elements.namedItem("card_list") as HTMLInputElement
-          const value = cardList.value
-
-          setCodes(value.split(",").map((code) => code.trim()))
-        }}
-        className="mb-10 space-y-4"
-      >
-        <p>Card list</p>
-        <Textarea name="card_list" rows={4} defaultValue={list.toString()} />
-        <Button type="submit">Import</Button>
-      </form>
-      {codes.length === 0 ? (
-        <p>Waiting for import...</p>
-      ) : (
-        <div className="mb-4 grid grid-cols-5 gap-4">
-          {codes.map((code, idx) => {
-            const card = cards.find((card) => card.code === code)
-            if (!card) {
-              return <p key={idx}>Loading...</p>
-            }
-
-            return <CardPreview key={idx} card={card} />
-          })}
+      <div className="my-10 space-y-4">
+        <Textarea name="card_list" rows={4} defaultValue={DECKS.BY_LUFFY.toString()} />
+        <Button onClick={onImport}>Import</Button>
+      </div>
+      <div className="grid grid-cols-6 gap-4">
+        <div className="col-span-2 grid gap-y-2">
+          {cardsWithCount.map((card) => (
+            <HoverCard key={card.id}>
+              <HoverCardTrigger asChild>
+                <div className="flex cursor-pointer items-center justify-between rounded rounded-l-full border">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-300 text-foreground">
+                    {card.count}
+                  </div>
+                  <span className="pl-2">{card.name}</span>
+                  <p className="bg-muted px-3 py-1">{card.count}</p>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent
+                side="right"
+                align="start"
+                className="w-[unset] max-w-sm md:max-w-xl"
+              >
+                <div className="flex space-x-4">
+                  <img src={card.image} className={"h-1/3 w-1/3 rounded object-contain"} />
+                  <div className="w-72 space-y-1">
+                    <h4 className="text-sm font-semibold">{card?.name}</h4>
+                    <p className="text-sm">{card?.effect ?? "No effect"}</p>
+                    <DescriptionList
+                      items={[
+                        { name: "Code", value: card.code },
+                        { name: "Attribute", value: card.attribute },
+                        { name: "Class", value: card.class },
+                        { name: "Set", value: card.set },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          ))}
         </div>
-      )}
+        <div className="h-full rounded border">Card search here</div>
+      </div>
     </Container>
   )
 }
-
-// Blue Doffy Deck
-// https://onepiecetopdecks.com/deck-list/japan-op-09-the-new-emperor-decks/deckgen/?dn=Blue%20Doffy&date=12/1/2024&cn=JP&au=Tappy&pl=1st%20Place&tn=Aichi%20Area(12-1)&hs=Bandai&dg=1nOP01-060a4nST03-005a3nST03-004a4nOP01-077a1nOP03-044a3nOP06-047a4nEB01-023a4nOP07-040a4nOP07-045a4nOP07-046a4nST17-002a2nST17-003a4nST17-004a4nST17-005a1nOP02-068a2nOP06-058a2nOP07-057&cs=223
-const list = [
-  "OP01-060",
-  "ST03-005",
-  "ST03-005",
-  "ST03-005",
-  "ST03-005",
-  "ST03-004",
-  "ST03-004",
-  "ST03-004",
-  "OP01-077",
-  "OP01-077",
-  "OP01-077",
-  "OP01-077",
-  "OP03-044",
-  "OP06-047",
-  "OP06-047",
-  "OP06-047",
-  "EB01-023",
-  "EB01-023",
-  "EB01-023",
-  "EB01-023",
-  "OP07-040",
-  "OP07-040",
-  "OP07-040",
-  "OP07-040",
-  "OP07-045",
-  "OP07-045",
-  "OP07-045",
-  "OP07-045",
-  "OP07-046",
-  "OP07-046",
-  "OP07-046",
-  "OP07-046",
-  "ST17-002",
-  "ST17-002",
-  "ST17-002",
-  "ST17-002",
-  "ST17-003",
-  "ST17-003",
-  "ST17-004",
-  "ST17-004",
-  "ST17-004",
-  "ST17-004",
-  "ST17-005",
-  "ST17-005",
-  "ST17-005",
-  "ST17-005",
-  "OP02-068",
-  "OP06-058",
-  "OP06-058",
-  "OP07-057",
-  "OP07-057",
-]
-
-// ChatGPT deck list
-const aiList = [
-  "OP01-016",
-  "OP01-016",
-  "OP01-016",
-  "OP01-016",
-  "OP01-016",
-  "OP01-016",
-  "OP01-016",
-  "OP01-016",
-  "OP01-017",
-  "OP01-017",
-  "OP01-017",
-  "OP01-024",
-  "OP01-024",
-  "OP01-024",
-  "OP01-024",
-  "OP01-025",
-  "OP01-025",
-  "OP01-025",
-  "OP01-025",
-  "OP01-026",
-  "OP01-029",
-  "OP01-029",
-  "OP01-029",
-  "OP01-029",
-  "OP01-120",
-  "OP01-120",
-  "OP01-120",
-  "OP01-120",
-  "OP01-120",
-  "OP01-120",
-  "OP02-004",
-  "OP02-004",
-  "OP02-004",
-  "OP02-004",
-  "OP02-004",
-  "OP02-005",
-  "OP02-011",
-  "OP02-013",
-  "OP02-013",
-  "OP02-013",
-  "OP02-013",
-  "OP02-013",
-  "OP02-018",
-  "OP02-018",
-  "OP02-018",
-  "OP02-018",
-  "OP02-018",
-  "OP02-018",
-  "OP02-018",
-]

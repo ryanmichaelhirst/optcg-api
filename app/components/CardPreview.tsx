@@ -9,10 +9,9 @@ export function CardPreview({ card, cardId }: { card: Card; cardId?: string | nu
   const [searchParams, setSearchParams] = useSearchParams()
 
   return (
-    <HoverCard key={card.id}>
+    <HoverCard>
       <HoverCardTrigger asChild>
         <img
-          key={card.id}
           src={card.image}
           className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
           onClick={() => {
