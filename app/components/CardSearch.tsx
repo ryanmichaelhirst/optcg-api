@@ -2,6 +2,7 @@ import { useCards } from "@/api/v1/hooks/cards"
 import { Card } from "@/api/v1/resources/cards/Card"
 import { CardPreview } from "@/components/CardPreview"
 import { DescriptionList } from "@/components/DescriptionList"
+import { LoadingCard } from "@/components/LoadingCard"
 import { Pagination } from "@/components/Pagination"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -49,7 +50,11 @@ const formSchema = Schema.Struct({
 })
 type TFormData = Schema.Schema.Type<typeof formSchema>
 
-export function CardSearch(props: any) {
+export function CardSearch(props: {
+  classes?: {
+    wrapper: string
+  }
+}) {
   const [isOpen, setIsOpen] = React.useState(false)
 
   const form = useForm<TFormData>({
@@ -92,7 +97,7 @@ export function CardSearch(props: any) {
   const total = cardsList.data?.total ?? 0
 
   return (
-    <>
+    <div className={cn(props.classes?.wrapper)}>
       <Form {...form}>
         <form
           className="space-y-8"
@@ -269,6 +274,8 @@ export function CardSearch(props: any) {
         </form>
       </Form>
       <div className="mb-4 grid grid-cols-5 gap-4">
+        {cardsList.isLoading &&
+          Array.from(Array(10).keys()).map((num) => <LoadingCard key={num} />)}
         {cards.map((card) => (
           <CardPreview key={card.id} card={card}>
             <img
@@ -290,7 +297,7 @@ export function CardSearch(props: any) {
           setSearchParams(searchParams)
         }}
       />
-    </>
+    </div>
   )
 }
 

@@ -12,7 +12,7 @@ export function CardPreview({
   preview?: boolean
 }) {
   return (
-    <HoverCard>
+    <HoverCard openDelay={100} closeDelay={100}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent side="right" align="start" className="w-[unset] max-w-sm md:max-w-xl">
         <div className="flex items-center space-x-4">
