@@ -1,31 +1,27 @@
 import { Card } from "@/api/v1/resources/cards/Card"
 import { DescriptionList } from "@/components/DescriptionList"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { cn } from "@/utils"
-import { SEARCH_PARAM_KEYS } from "@/utils/search-params"
-import { useSearchParams } from "@remix-run/react"
 
-export function CardPreview({ card, cardId }: { card: Card; cardId?: string | null }) {
-  const [searchParams, setSearchParams] = useSearchParams()
-
+export function CardPreview({
+  card,
+  children,
+  preview,
+}: {
+  card: Card
+  children: React.ReactNode
+  preview?: boolean
+}) {
   return (
     <HoverCard>
-      <HoverCardTrigger asChild>
-        <img
-          src={card.image}
-          className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
-          onClick={() => {
-            searchParams.set(SEARCH_PARAM_KEYS.ID, card.id)
-            setSearchParams(searchParams)
-          }}
-        />
-      </HoverCardTrigger>
-      <HoverCardContent className="w-80">
-        <div className="flex justify-between space-x-4">
-          <div className="space-y-1">
-            <h4 className="text-sm font-semibold">{card?.name}</h4>
+      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+      <HoverCardContent side="right" align="start" className="w-[unset] max-w-sm md:max-w-xl">
+        <div className="flex items-center space-x-4">
+          {preview && <img src={card.image} className={"h-1/3 w-1/3 rounded object-contain"} />}
+          <div className="w-72">
+            <h4 className="my-0 text-sm font-semibold">{card?.name}</h4>
             <p className="text-sm">{card?.effect ?? "No effect"}</p>
             <DescriptionList
+              classes={{ wrapper: "mt-4" }}
               items={[
                 { name: "Code", value: card.code },
                 { name: "Attribute", value: card.attribute },

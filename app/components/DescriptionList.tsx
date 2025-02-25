@@ -1,10 +1,15 @@
-export function DescriptionList(props: { items: { name: string; value: React.ReactNode }[] }) {
+export function DescriptionList(props: {
+  items: { name: string; value: React.ReactNode }[]
+  classes?: {
+    wrapper: string
+  }
+}) {
   return (
-    <div>
+    <div className={props.classes?.wrapper}>
       <dl>
         {props.items.map((item, i) => {
           return (
-            <div key={i} className="flex items-center gap-x-2 py-2 sm:px-0">
+            <div key={i} className="flex items-center sm:px-0">
               <dt className="w-20 flex-none whitespace-break-spaces break-words text-sm font-normal leading-6 text-muted-foreground">
                 {item.name}
               </dt>
