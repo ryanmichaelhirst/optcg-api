@@ -2,9 +2,10 @@ import { db } from "@/lib/db.server"
 import { HttpApiBuilder } from "@effect/platform"
 import { Effect } from "effect"
 import { ApiV1 } from "../../../ApiV1"
+import { rateLimiterMiddleware } from "../../../middleware/rateLimiter.server"
 import { serializeCard } from "../serializeCard"
 
-export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", (args) =>
+const cardsListHandler = (args: any) =>
   Effect.gen(function* () {
     const where = buildWhere(args.urlParams)
     const cards = yield* Effect.promise(() =>
@@ -26,8 +27,9 @@ export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", (args) =
       per_page: args.urlParams.per_page,
       total_pages: Math.ceil(total / args.urlParams.per_page),
     }
-  }),
-)
+  })
+
+export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", rateLimiterMiddleware(cardsListHandler))
 
 function buildWhere(args: {
   page?: number

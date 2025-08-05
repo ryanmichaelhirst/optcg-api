@@ -3,9 +3,10 @@ import { HttpApiBuilder } from "@effect/platform"
 import { NotFound } from "@effect/platform/HttpApiError"
 import { Effect } from "effect"
 import { ApiV1 } from "../../../ApiV1"
+import { rateLimiterMiddleware } from "../../../middleware/rateLimiter.server"
 import { serializeCard } from "../serializeCard"
 
-export const cardsFindById = HttpApiBuilder.handler(ApiV1, "cards", "findById", (args) =>
+const cardsFindByIdHandler = (args: any) =>
   Effect.gen(function* () {
     const card = yield* Effect.promise(() =>
       db.card.findFirst({
@@ -20,5 +21,6 @@ export const cardsFindById = HttpApiBuilder.handler(ApiV1, "cards", "findById", 
     }
 
     return yield* serializeCard(card).pipe(Effect.die)
-  }),
-)
+  })
+
+export const cardsFindById = HttpApiBuilder.handler(ApiV1, "cards", "findById", rateLimiterMiddleware(cardsFindByIdHandler))
