@@ -21,6 +21,7 @@
     "start": "cross-env NODE_ENV=production node ./build/server.js",
     "test": "vitest",
     "test:ui": "vitest --ui",
+    "test:rate-limit": "tsx scripts/test-rate-limit.ts",
     "tunnel": "cloudflared tunnel --config cloudflare.yaml run",
     "typecheck": "tsc"
   },
