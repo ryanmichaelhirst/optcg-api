@@ -53,13 +53,7 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
           return yield* handler(args);
         }
 
-        // For now, just pass through to the handler without rate limiting
-        // This will help us debug if the rate limiter is causing the 500 error
-        console.log("Rate limiter: Processing external request (rate limiting disabled for debugging)");
-        return yield* handler(args);
-
-        // TODO: Re-enable rate limiting once we confirm the middleware works
-        /*
+        // Step 1: Re-enable basic rate limiting logic
         const key = `rate_limit:${clientIp}`;
         const now = Date.now();
         const windowMs = 60000; // 1 minute
@@ -73,36 +67,24 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
             count: 1,
             resetTime: now + windowMs
           });
-        } else if (current.count >= maxRequests) {
-          // Rate limit exceeded - return a proper HTTP response instead of throwing
-          const errorResponse = new Response(
-            JSON.stringify({
-              error: "Rate limit exceeded",
-              message: "Maximum 100 requests per minute.",
-              retryAfter: Math.ceil((current.resetTime - now) / 1000)
-            }),
-            {
-              status: 429,
-              statusText: "Too Many Requests",
-              headers: {
-                "Content-Type": "application/json",
-                "X-RateLimit-Limit": maxRequests.toString(),
-                "X-RateLimit-Remaining": "0",
-                "X-RateLimit-Reset": current.resetTime.toString(),
-                "Retry-After": Math.ceil((current.resetTime - now) / 1000).toString()
-              }
-            }
-          );
-          return errorResponse;
+          console.log(`Rate limiter: New window for ${clientIp}, count: 1`);
         } else {
           // Increment count
           current.count++;
+          console.log(`Rate limiter: Incrementing count for ${clientIp}, count: ${current.count}`);
+          
+          // Check if rate limit exceeded
+          if (current.count >= maxRequests) {
+            console.log(`Rate limiter: Rate limit exceeded for ${clientIp}`);
+            // For now, just log the rate limit hit but don't block the request
+            // We'll re-enable blocking in the next step
+          }
         }
 
         // Process the request normally
         const response = yield* handler(args);
         
-        // Add rate limit headers to successful responses
+        // Step 2: Add basic rate limit headers (without complex response modification)
         if (response instanceof Response) {
           const headers = new Headers(response.headers);
           headers.set("X-RateLimit-Limit", maxRequests.toString());
@@ -117,7 +99,6 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
         }
 
         return response;
-        */
       } catch (error) {
         // If there's any error in the rate limiter, just pass through to the handler
         console.error("Rate limiter error:", error);
