@@ -31,8 +31,12 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
   return (args: T) => {
     return Effect.gen(function* () {
       try {
+        console.log("Rate limiter: Middleware called");
+        console.log("Rate limiter: NODE_ENV =", process.env.NODE_ENV);
+        
         // Skip rate limiting in development
         if (process.env.NODE_ENV === "development") {
+          console.log("Rate limiter: Skipping due to development mode");
           return yield* handler(args);
         }
 
@@ -46,12 +50,15 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
 
         // Log request for debugging
         console.log(`Rate limiter: Request from ${clientIp}, origin: ${origin}`);
+        console.log(`Rate limiter: All headers:`, Object.fromEntries(args.request.headers.entries()));
 
         // Skip rate limiting for requests from the same domain
         if (origin.includes("optcg-api.ryanmichaelhirst.us") || origin.includes("localhost")) {
           console.log("Rate limiter: Skipping rate limit for whitelisted domain");
           return yield* handler(args);
         }
+
+        console.log("Rate limiter: Processing external request with rate limiting");
 
         // Step 2: Re-enable rate limit blocking
         const key = `rate_limit:${clientIp}`;

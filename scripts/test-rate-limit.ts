@@ -16,16 +16,14 @@ async function testRateLimit() {
   let errorCount = 0;
   let rateLimitHit = false;
 
-  // Make 101 requests
-  for (let i = 1; i <= 101; i++) {
+  // Make 110 requests
+  for (let i = 1; i <= 110; i++) {
     try {
       const response = await fetch(`${API_BASE_URL}${ENDPOINT}?page=1&per_page=1`);
       
       if (response.ok) {
         successCount++;
-        if (i <= 10 || i % 10 === 0) {
-          console.log(`✅ Request ${i}: Success`);
-        }
+        console.log(`✅ Request ${i}: Success`);
       } else {
         errorCount++;
         console.log(`❌ Request ${i}: HTTP ${response.status} - ${response.statusText}`);
