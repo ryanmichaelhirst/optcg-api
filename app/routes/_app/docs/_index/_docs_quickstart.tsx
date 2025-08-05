@@ -44,7 +44,7 @@ export default function Page() {
         <h2 className="text-2xl font-semibold text-gray-900">Base URL</h2>
         <div className="bg-gray-900 rounded-lg p-4">
           <span className="text-gray-400 font-mono text-lg">
-            https://optcgapi.ryanmichaelhirst.us
+            https://optcg-api.ryanmichaelhirst.us
           </span>
         </div>
       </section>
