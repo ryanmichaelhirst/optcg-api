@@ -10,7 +10,7 @@ function getPrismaClient() {
   const { DATABASE_URL } = process.env
   invariant(typeof DATABASE_URL === "string", "DATABASE_URL env var not set")
 
-  console.log(`🔌 setting up prisma client`)
+  console.log(`🔌 setting up prisma client`, DATABASE_URL, process.env)
   // NOTE: during development if you change anything in this function, remember
   // that this only runs once per server restart and won't automatically be
   // re-run per request like everything else is. So if you need to change
