@@ -273,46 +273,52 @@ export default function Page() {
           </form>
         </Form>
       </div>
-      {cardsList.isLoading && (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      {cardsList.isLoading || cardsList.isFetching ? (
+        <div className="flex justify-center items-center py-16">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-gray-600">Loading cards...</p>
+          </div>
         </div>
-      )}
-      <div className="mb-4 grid grid-cols-5 gap-4">
-        {cards.map((card) => (
-          <HoverCard key={card.id}>
-            <HoverCardTrigger asChild>
-              <img
-                key={card.id}
-                src={card.image}
-                className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
-                onClick={() => {
-                  searchParams.set(SEARCH_PARAM_KEYS.ID, card.id)
-                  setSearchParams(searchParams)
-                }}
-              />
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="flex justify-between space-x-4">
-                <div className="space-y-1">
-                  <h4 className="text-sm font-semibold">{card?.name}</h4>
-                  <p className="text-sm">{card?.effect ?? "No effect"}</p>
-                  <DescriptionList
-                    items={[
-                      { name: "Code", value: card.code },
-
-                      { name: "Attribute", value: card.attribute },
-                      { name: "Class", value: card.class },
-                      { name: "Set", value: card.set },
-                    ]}
+      ) : (
+        <>
+          <div className="mb-4 grid grid-cols-5 gap-4">
+            {cards.map((card) => (
+              <HoverCard key={card.id}>
+                <HoverCardTrigger asChild>
+                  <img
+                    key={card.id}
+                    src={card.image}
+                    className={cn("cursor-pointer rounded", card.id === cardId && "drop-shadow-xl")}
+                    onClick={() => {
+                      searchParams.set(SEARCH_PARAM_KEYS.ID, card.id)
+                      setSearchParams(searchParams)
+                    }}
                   />
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-        ))}
-      </div>
-      <Pagination page={page} perPage={perPage} total={total} />
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="flex justify-between space-x-4">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-semibold">{card?.name}</h4>
+                      <p className="text-sm">{card?.effect ?? "No effect"}</p>
+                      <DescriptionList
+                        items={[
+                          { name: "Code", value: card.code },
+
+                          { name: "Attribute", value: card.attribute },
+                          { name: "Class", value: card.class },
+                          { name: "Set", value: card.set },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            ))}
+          </div>
+          <Pagination page={page} perPage={perPage} total={total} />
+        </>
+      )}
       <div className='h-10' />
       <CardSheet
         card={cards.find((card) => card.id === cardId)}
