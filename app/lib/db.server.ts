@@ -7,10 +7,10 @@ import { singleton } from "@/utils/singleton.server"
 export const db = singleton("prisma", getPrismaClient)
 
 function getPrismaClient() {
-  const { PUBLIC_DATABASE_URL } = process.env
-  invariant(typeof PUBLIC_DATABASE_URL === "string", "PUBLIC_DATABASE_URL env var not set")
+  const { DATABASE_PUBLIC_URL } = process.env
+  invariant(typeof DATABASE_PUBLIC_URL === "string", "DATABASE_PUBLIC_URL env var not set")
 
-  console.log(`🔌 setting up prisma client`, PUBLIC_DATABASE_URL)
+  console.log(`🔌 setting up prisma client`, DATABASE_PUBLIC_URL)
   // NOTE: during development if you change anything in this function, remember
   // that this only runs once per server restart and won't automatically be
   // re-run per request like everything else is. So if you need to change

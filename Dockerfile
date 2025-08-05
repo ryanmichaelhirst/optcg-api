@@ -43,7 +43,7 @@ ADD . .
 RUN pnpm build
 
 # Run migrations
-ARG PUBLIC_DATABASE_URL
+ARG DATABASE_PUBLIC_URL
 RUN pnpm deploy:db
 
 # Finally, build the production image with minimal footprint
