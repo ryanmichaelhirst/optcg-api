@@ -53,7 +53,7 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
           return yield* handler(args);
         }
 
-        // Step 1: Re-enable basic rate limiting logic
+        // Step 2: Re-enable rate limit blocking
         const key = `rate_limit:${clientIp}`;
         const now = Date.now();
         const windowMs = 60000; // 1 minute
@@ -75,16 +75,34 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
           
           // Check if rate limit exceeded
           if (current.count >= maxRequests) {
-            console.log(`Rate limiter: Rate limit exceeded for ${clientIp}`);
-            // For now, just log the rate limit hit but don't block the request
-            // We'll re-enable blocking in the next step
+            console.log(`Rate limiter: Rate limit exceeded for ${clientIp} - returning 429`);
+            // Return 429 response when rate limit is exceeded
+            const errorResponse = new Response(
+              JSON.stringify({
+                error: "Rate limit exceeded",
+                message: "Maximum 100 requests per minute.",
+                retryAfter: Math.ceil((current.resetTime - now) / 1000)
+              }),
+              {
+                status: 429,
+                statusText: "Too Many Requests",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-RateLimit-Limit": maxRequests.toString(),
+                  "X-RateLimit-Remaining": "0",
+                  "X-RateLimit-Reset": current.resetTime.toString(),
+                  "Retry-After": Math.ceil((current.resetTime - now) / 1000).toString()
+                }
+              }
+            );
+            return errorResponse;
           }
         }
 
         // Process the request normally
         const response = yield* handler(args);
         
-        // Step 2: Add basic rate limit headers (without complex response modification)
+        // Add rate limit headers to successful responses
         if (response instanceof Response) {
           const headers = new Headers(response.headers);
           headers.set("X-RateLimit-Limit", maxRequests.toString());
