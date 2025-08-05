@@ -25,7 +25,7 @@ setInterval(() => {
   }
 }, 60000); // Clean up every minute
 
-export function rateLimiterMiddleware<T extends { request: Request }>(
+export function rateLimiterMiddleware<T>(
   handler: (args: T) => Effect.Effect<any, any, any>
 ) {
   return (args: T) => {
@@ -33,6 +33,7 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
       try {
         console.log("Rate limiter: Middleware called");
         console.log("Rate limiter: NODE_ENV =", process.env.NODE_ENV);
+        console.log("Rate limiter: args =", args);
         
         // Skip rate limiting in development
         if (process.env.NODE_ENV === "development") {
@@ -40,17 +41,34 @@ export function rateLimiterMiddleware<T extends { request: Request }>(
           return yield* handler(args);
         }
 
+        // Try to get request from different possible structures
+        let request: Request | undefined;
+        let clientIp = "unknown";
+        let origin = "unknown";
+
+        // Check if args has a request property
+        if (args && typeof args === 'object' && 'request' in args) {
+          request = (args as any).request;
+        }
+        
+        // If no request found, try to get it from the Effect.js context
+        if (!request) {
+          console.log("Rate limiter: No request found in args, trying to get from context");
+          // For now, just pass through to avoid errors
+          return yield* handler(args);
+        }
+
         // Get client IP
-        const forwardedFor = args.request.headers.get("x-forwarded-for");
-        const realIp = args.request.headers.get("x-real-ip");
-        const clientIp = forwardedFor?.split(",")[0] || realIp || "unknown";
+        const forwardedFor = request.headers.get("x-forwarded-for");
+        const realIp = request.headers.get("x-real-ip");
+        clientIp = forwardedFor?.split(",")[0] || realIp || "unknown";
 
         // Get origin
-        const origin = args.request.headers.get("origin") || args.request.headers.get("referer") || "unknown";
+        origin = request.headers.get("origin") || request.headers.get("referer") || "unknown";
 
         // Log request for debugging
         console.log(`Rate limiter: Request from ${clientIp}, origin: ${origin}`);
-        console.log(`Rate limiter: All headers:`, Object.fromEntries(args.request.headers.entries()));
+        console.log(`Rate limiter: All headers:`, Object.fromEntries(request.headers.entries()));
 
         // Skip rate limiting for requests from the same domain
         if (origin.includes("optcg-api.ryanmichaelhirst.us") || origin.includes("localhost")) {
