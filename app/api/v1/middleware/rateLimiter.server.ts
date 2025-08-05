@@ -33,7 +33,6 @@ export function rateLimiterMiddleware<T>(
       try {
         console.log("Rate limiter: Middleware called");
         console.log("Rate limiter: NODE_ENV =", process.env.NODE_ENV);
-        console.log("Rate limiter: args =", args);
         
         // Skip rate limiting in development
         if (process.env.NODE_ENV === "development") {
@@ -41,45 +40,12 @@ export function rateLimiterMiddleware<T>(
           return yield* handler(args);
         }
 
-        // Try to get request from different possible structures
-        let request: Request | undefined;
-        let clientIp = "unknown";
-        let origin = "unknown";
+        // For now, let's just pass through and add basic rate limiting without request details
+        // We'll implement a simpler approach that doesn't rely on request headers
+        console.log("Rate limiter: Processing with simplified rate limiting");
 
-        // Check if args has a request property
-        if (args && typeof args === 'object' && 'request' in args) {
-          request = (args as any).request;
-        }
-        
-        // If no request found, try to get it from the Effect.js context
-        if (!request) {
-          console.log("Rate limiter: No request found in args, trying to get from context");
-          // For now, just pass through to avoid errors
-          return yield* handler(args);
-        }
-
-        // Get client IP
-        const forwardedFor = request.headers.get("x-forwarded-for");
-        const realIp = request.headers.get("x-real-ip");
-        clientIp = forwardedFor?.split(",")[0] || realIp || "unknown";
-
-        // Get origin
-        origin = request.headers.get("origin") || request.headers.get("referer") || "unknown";
-
-        // Log request for debugging
-        console.log(`Rate limiter: Request from ${clientIp}, origin: ${origin}`);
-        console.log(`Rate limiter: All headers:`, Object.fromEntries(request.headers.entries()));
-
-        // Skip rate limiting for requests from the same domain
-        if (origin.includes("optcg-api.ryanmichaelhirst.us") || origin.includes("localhost")) {
-          console.log("Rate limiter: Skipping rate limit for whitelisted domain");
-          return yield* handler(args);
-        }
-
-        console.log("Rate limiter: Processing external request with rate limiting");
-
-        // Step 2: Re-enable rate limit blocking
-        const key = `rate_limit:${clientIp}`;
+        // Use a global rate limit for now (not IP-based)
+        const key = "rate_limit:global";
         const now = Date.now();
         const windowMs = 60000; // 1 minute
         const maxRequests = 100;
@@ -92,15 +58,15 @@ export function rateLimiterMiddleware<T>(
             count: 1,
             resetTime: now + windowMs
           });
-          console.log(`Rate limiter: New window for ${clientIp}, count: 1`);
+          console.log(`Rate limiter: New window, count: 1`);
         } else {
           // Increment count
           current.count++;
-          console.log(`Rate limiter: Incrementing count for ${clientIp}, count: ${current.count}`);
+          console.log(`Rate limiter: Incrementing count, count: ${current.count}`);
           
           // Check if rate limit exceeded
           if (current.count >= maxRequests) {
-            console.log(`Rate limiter: Rate limit exceeded for ${clientIp} - returning 429`);
+            console.log(`Rate limiter: Rate limit exceeded - returning 429`);
             // Return 429 response when rate limit is exceeded
             const errorResponse = new Response(
               JSON.stringify({
