@@ -52,13 +52,6 @@ type TFormData = Schema.Schema.Type<typeof formSchema>
 export default function Page() {
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const form = useForm<TFormData>({
-    resolver: effectTsResolver(formSchema),
-    defaultValues: {
-      search: "",
-    },
-  })
-
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get(SEARCH_PARAM_KEYS.PAGE)) || 1
   const perPage = Number(searchParams.get(SEARCH_PARAM_KEYS.PER_PAGE)) || 10
@@ -73,6 +66,13 @@ export default function Page() {
   const cardPower = searchParams.get(SEARCH_PARAM_KEYS.POWER) ?? "all"
   const cardRarity = searchParams.get(SEARCH_PARAM_KEYS.RARITY) ?? "all"
   const debouncedSetSearchParams = useDebounceCallback(setSearchParams, 500)
+
+  const form = useForm<TFormData>({
+    resolver: effectTsResolver(formSchema),
+    defaultValues: {
+      search: search || "",
+    },
+  })
 
   const cardsList = useCards({
     page,
@@ -97,6 +97,9 @@ export default function Page() {
         <Form {...form}>
           <form
             className="space-y-8"
+            onSubmit={(e) => {
+              e.preventDefault()
+            }}
             onInput={(e) => {
               const form = e.currentTarget
               const search = form.elements.namedItem(SEARCH_PARAM_KEYS.SEARCH) as HTMLInputElement
@@ -305,6 +308,7 @@ export default function Page() {
         ))}
       </div>
       <Pagination page={page} perPage={perPage} total={total} />
+      <div className='h-10' />
       <CardSheet
         card={cards.find((card) => card.id === cardId)}
         onOpenChange={(open) => {
