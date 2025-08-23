@@ -11,32 +11,32 @@ interface CopyButtonProps {
   showText?: boolean
 }
 
-export function CopyButton({ 
-  text, 
-  variant = "ghost", 
-  size = "sm", 
+export function CopyButton({
+  text,
+  variant = "ghost",
+  size = "sm",
   className = "",
-  showText = false 
+  showText = false,
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
 
   const copyToClipboard = async () => {
     try {
-      console.log('CopyButton: Attempting to copy text:', text)
+      console.log("CopyButton: Attempting to copy text:", text)
       await navigator.clipboard.writeText(text)
       setCopied(true)
-      
-      console.log('CopyButton: Text copied successfully, showing toast')
+
+      console.log("CopyButton: Text copied successfully, showing toast")
       // Show success toast message
       toast.success("Content copied to clipboard", {
         description: "The text has been copied to your clipboard",
         duration: 2000,
       })
-      
+
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('CopyButton: Failed to copy text: ', err)
-      
+      console.error("CopyButton: Failed to copy text: ", err)
+
       // Show error toast
       toast.error("Failed to copy content", {
         description: "Please try copying manually",

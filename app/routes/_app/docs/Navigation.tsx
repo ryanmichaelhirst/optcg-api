@@ -37,7 +37,7 @@ function NavLink({
       to={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex justify-between gap-2 py-1 pr-3 text-sm transition pl-0",
+        "flex justify-between gap-2 py-1 pl-0 pr-3 text-sm transition",
         active
           ? "text-zinc-900 dark:text-white"
           : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white",
@@ -51,31 +51,34 @@ function NavLink({
 
 function NavigationGroup({ group, className }: { group: NavGroup; className?: string }) {
   const location = useLocation()
-  
+
   return (
     <li className={cn("relative mt-6", className)}>
-      <motion.h2 layout="position" className="text-base font-semibold text-zinc-900 dark:text-white">
+      <motion.h2
+        layout="position"
+        className="text-base font-semibold text-zinc-900 dark:text-white"
+      >
         {group.title}
       </motion.h2>
       <div className="relative mt-3">
         <ul>
           {group.links.map((link) => {
             const isActive = location.pathname === link.href
-            const hasActiveChild = link.children?.some(child => location.pathname === child.href)
-            
+            const hasActiveChild = link.children?.some((child) => location.pathname === child.href)
+
             return (
               <motion.li key={link.href} layout="position" className="relative">
                 <NavLink href={link.href} active={isActive || hasActiveChild}>
                   {link.title}
                 </NavLink>
-                
+
                 {/* Render child links if they exist */}
                 {link.children && (
                   <ul className="mt-1">
                     {link.children.map((child) => (
                       <motion.li key={child.href} layout="position" className="relative">
-                        <NavLink 
-                          href={child.href} 
+                        <NavLink
+                          href={child.href}
                           active={location.pathname === child.href}
                           isChild={true}
                         >

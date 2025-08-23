@@ -25,7 +25,7 @@ export class CardsApi extends HttpApiGroup.make("cards")
   )
   .add(
     HttpApiEndpoint.get("findById", "/cards/:id")
-      .setUrlParams(
+      .setPath(
         Schema.Struct({
           id: Schema.String,
         }),
