@@ -29,7 +29,12 @@ const cardsListHandler = (args: any) =>
     }
   })
 
-export const cardsList = HttpApiBuilder.handler(ApiV1, "cards", "list", rateLimiterMiddleware(cardsListHandler))
+export const cardsList = HttpApiBuilder.handler(
+  ApiV1,
+  "cards",
+  "list",
+  rateLimiterMiddleware(cardsListHandler),
+)
 
 function buildWhere(args: {
   page?: number

@@ -23,4 +23,9 @@ const cardsFindByIdHandler = (args: any) =>
     return yield* serializeCard(card).pipe(Effect.die)
   })
 
-export const cardsFindById = HttpApiBuilder.handler(ApiV1, "cards", "findById", rateLimiterMiddleware(cardsFindByIdHandler))
+export const cardsFindById = HttpApiBuilder.handler(
+  ApiV1,
+  "cards",
+  "findById",
+  rateLimiterMiddleware(cardsFindByIdHandler),
+)

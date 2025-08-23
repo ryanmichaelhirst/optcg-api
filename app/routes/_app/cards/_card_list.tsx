@@ -274,9 +274,9 @@ export default function Page() {
         </Form>
       </div>
       {cardsList.isLoading || cardsList.isFetching ? (
-        <div className="flex justify-center items-center py-16">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <div className="flex items-center justify-center py-16">
+          <div className="space-y-4 text-center">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
             <p className="text-gray-600">Loading cards...</p>
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function Page() {
           <Pagination page={page} perPage={perPage} total={total} />
         </>
       )}
-      <div className='h-10' />
+      <div className="h-10" />
       <CardSheet
         card={cards.find((card) => card.id === cardId)}
         onOpenChange={(open) => {

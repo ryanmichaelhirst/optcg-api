@@ -1,5 +1,6 @@
 "use client"
 
+import { useLocation } from "@remix-run/react"
 import { motion } from "framer-motion"
 
 import { ButtonLink } from "@/components/ButtonLink"
@@ -11,19 +12,11 @@ interface NavGroup {
   links: Array<{
     title: string
     href: string
+    children?: Array<{
+      title: string
+      href: string
+    }>
   }>
-}
-function TopLevelNavItem({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <li className="md:hidden">
-      <ButtonLink
-        to={href}
-        className="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-      >
-        {children}
-      </ButtonLink>
-    </li>
-  )
 }
 
 function NavLink({
@@ -31,21 +24,20 @@ function NavLink({
   children,
   tag,
   active = false,
-  isAnchorLink = false,
 }: {
   href: string
   children: React.ReactNode
   tag?: string
   active?: boolean
   isAnchorLink?: boolean
+  isChild?: boolean
 }) {
   return (
     <ButtonLink
       to={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex justify-between gap-2 py-1 pr-3 text-sm transition",
-        isAnchorLink ? "pl-7" : "pl-4",
+        "flex justify-between gap-2 py-1 pr-3 text-sm transition pl-0",
         active
           ? "text-zinc-900 dark:text-white"
           : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white",
@@ -58,22 +50,44 @@ function NavLink({
 }
 
 function NavigationGroup({ group, className }: { group: NavGroup; className?: string }) {
+  const location = useLocation()
+  
   return (
     <li className={cn("relative mt-6", className)}>
-      <motion.h2 layout="position" className="text-xs font-semibold text-zinc-900 dark:text-white">
+      <motion.h2 layout="position" className="text-base font-semibold text-zinc-900 dark:text-white">
         {group.title}
       </motion.h2>
-      <div className="relative mt-3 pl-2">
-        <motion.div
-          layout
-          className="absolute inset-y-0 left-2 w-px bg-zinc-900/10 dark:bg-white/5"
-        />
-        <ul role="list" className="border-l border-transparent">
-          {group.links.map((link) => (
-            <motion.li key={link.href} layout="position" className="relative">
-              <NavLink href={link.href}>{link.title}</NavLink>
-            </motion.li>
-          ))}
+      <div className="relative mt-3">
+        <ul>
+          {group.links.map((link) => {
+            const isActive = location.pathname === link.href
+            const hasActiveChild = link.children?.some(child => location.pathname === child.href)
+            
+            return (
+              <motion.li key={link.href} layout="position" className="relative">
+                <NavLink href={link.href} active={isActive || hasActiveChild}>
+                  {link.title}
+                </NavLink>
+                
+                {/* Render child links if they exist */}
+                {link.children && (
+                  <ul className="mt-1">
+                    {link.children.map((child) => (
+                      <motion.li key={child.href} layout="position" className="relative">
+                        <NavLink 
+                          href={child.href} 
+                          active={location.pathname === child.href}
+                          isChild={true}
+                        >
+                          {child.title}
+                        </NavLink>
+                      </motion.li>
+                    ))}
+                  </ul>
+                )}
+              </motion.li>
+            )
+          })}
         </ul>
       </div>
     </li>
@@ -82,12 +96,19 @@ function NavigationGroup({ group, className }: { group: NavGroup; className?: st
 
 const navigation: Array<NavGroup> = [
   {
-    title: "Guides",
-    links: [{ title: "Quickstart", href: "/docs" }],
+    title: "Get Started",
+    links: [
+      { title: "Overview", href: "/docs" },
+      { title: "Authentication", href: "/docs/auth" },
+    ],
   },
   {
-    title: "Resources",
-    links: [{ title: "Cards", href: "/docs/cards" }],
+    title: "Cards API",
+    links: [
+      { title: "Overview", href: "/docs/cards/overview" },
+      { title: "List Cards", href: "/docs/cards/list" },
+      { title: "Get Card", href: "/docs/cards/id" },
+    ],
   },
 ]
 
@@ -95,9 +116,6 @@ export function Navigation(props: React.ComponentPropsWithoutRef<"nav">) {
   return (
     <nav {...props}>
       <ul role="list">
-        <TopLevelNavItem href="/">API</TopLevelNavItem>
-        <TopLevelNavItem href="#">Documentation</TopLevelNavItem>
-        <TopLevelNavItem href="#">Support</TopLevelNavItem>
         {navigation.map((group, groupIndex) => (
           <NavigationGroup
             key={group.title}

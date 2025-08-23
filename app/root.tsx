@@ -4,6 +4,7 @@ import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node"
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { typedjson, useTypedLoaderData } from "remix-typedjson"
+import { Toaster } from "sonner"
 import { cn } from "./utils"
 import { app } from "./utils/app.server"
 
@@ -15,7 +16,7 @@ export const links: LinksFunction = () => [
 export const loader = async (args: LoaderFunctionArgs) =>
   app(args).build(async (ctx) => {
     // const theme = ctx.session.get("theme")
-    const theme = "light"
+    const theme = "dark"
 
     return typedjson({ theme })
   })
@@ -36,6 +37,7 @@ export default function App() {
       <body className="h-full">
         <QueryClientProvider client={queryClient}>
           <Outlet />
+          <Toaster />
         </QueryClientProvider>
 
         <ScrollRestoration />

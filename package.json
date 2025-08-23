@@ -79,6 +79,7 @@
     "remix-typedjson": "^0.4.1",
     "remix-utils": "^7.6.0",
     "routes-gen": "^0.6.1",
+    "sonner": "^2.0.7",
     "source-map-support": "^0.5.21",
     "stripe": "^15.7.0",
     "tailwind-merge": "^2.2.2",
